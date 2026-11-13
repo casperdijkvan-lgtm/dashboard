@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="44f69c347c">
+<meta name="dashboard-versie" content="cf1b3b4d38">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -428,7 +428,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     <span class="spacer"></span>
     <span class="sync" id="syncState" aria-live="polite"></span>
     <button class="icon-btn" id="refreshBtn" type="button" aria-label="Gegevens vernieuwen"><svg viewBox="0 0 20 20"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 3.5V7h-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <button class="icon-btn" id="settingsBtn" type="button" aria-label="Instellingen en bronnen"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    <button class="icon-btn" id="settingsBtn" type="button" aria-label="Instellingen en bronnen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
   <div class="filters wrap">
     <div class="seg" id="rangeSeg" role="radiogroup" aria-label="Periode"></div>
@@ -474,7 +474,10 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     <section class="view" id="lichaam" data-view="lichaam">
       <div class="sec-head"><h2 class="sec-title">Lichaam</h2><p class="sec-note" id="hrvSource"></p></div>
       <div id="c-hrv"></div>
-      <div id="c-rhr"></div>
+      <div class="grid-2">
+        <div id="c-ochtend"></div>
+        <div id="c-rhr"></div>
+      </div>
     </section>
 
     <section class="view" id="training" data-view="training">
@@ -525,7 +528,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     <div class="set-head"><h2>Instellingen</h2><button class="icon-btn" type="button" id="closeSettings" aria-label="Sluiten"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
     <div class="set-block">
       <h3>Dropbox</h3>
-      <p id="dbxText">Leest Scores.csv en WorkScores.csv uit Apps › Scores en het nieuwste bestand uit Apps › HRV4Training.</p>
+      <p id="dbxText">Leest Scores.csv, WorkScores.csv en MorningScores.csv uit Apps › Scores en het nieuwste bestand uit Apps › HRV4Training.</p>
       <div class="row-btns"><button class="btn primary" type="button" id="dbxConnect">Koppel Dropbox</button><button class="btn danger" type="button" id="dbxDisconnect" hidden>Ontkoppelen</button></div>
     </div>
     <div class="set-block">
@@ -554,6 +557,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     workName: 'WorkScores.csv',
     scoresPath: '/Apps/Scores/Scores.csv',
     workPath: '/Apps/Scores/WorkScores.csv',
+    morningName: 'MorningScores.csv',
+    morningPath: '/Apps/Scores/MorningScores.csv',
     hrvFolder: '/Apps/HRV4Training',
     icuDays: 420,
   };
@@ -813,6 +818,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     wStress: { label: 'Werkstress', short: 'Stress', src: 'work', col: 'Stress', min: 1, max: 10, good: 'down', d: 1 },
     unclenched: { label: 'Unclenched', src: 'work', col: 'Unclenched', min: 1, max: 10, good: 'up', d: 1 },
     workload: { label: 'Workload', src: 'work', col: 'Workload', min: 1, max: 10, good: null, d: 1 },
+    mSlaap: { label: 'Slaap', src: 'morning', col: 'Slaap', min: 1, max: 10, good: 'up', d: 1 },
+    mWakker: { label: 'Wakker', src: 'morning', col: 'Wakker', min: 1, max: 10, good: 'up', d: 1 },
+    mGevoel: { label: 'Ochtendgevoel', short: 'Gevoel', src: 'morning', col: 'Gevoel', min: 1, max: 10, good: 'up', d: 1 },
     hrv: { label: 'HRV', unit: 'ms', src: 'body', good: 'up', d: 0 },
     rhr: { label: 'Rusthartslag', unit: 'bpm', src: 'body', good: 'down', d: 0 },
     load: { label: 'Belasting', src: 'icu', good: null, d: 0, sum: true },
@@ -845,7 +853,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   function buildModel() {
     DATA = new Map(); ROLL = new Map();
     const validDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s);
-    for (const src of ['scores', 'work']) {
+    const NOTE_KEY = { scores: 'note', work: 'workNote', morning: 'morningNote' };
+    for (const src of ['scores', 'work', 'morning']) {
       const raw = RAW[src];
       if (!raw || !raw.text) continue;
       const t = parseDelimited(raw.text);
@@ -864,7 +873,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
           r[key] = v;
         }
         const c = ci >= 0 ? (row[ci] || '').trim() : '';
-        if (c) r[src === 'scores' ? 'note' : 'workNote'] = c;
+        if (c) r[NOTE_KEY[src]] = c;
       }
     }
     // HRV4Training
@@ -1421,7 +1430,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   }
 
   // ================= Spreidingsdiagram (verkenner) =================
-  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'alcohol', 'ziek', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
+  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'alcohol', 'ziek', 'mSlaap', 'mWakker', 'mGevoel', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
   function pairs(xk, yk, lag, days) {
     const out = [];
     for (const d of days) {
@@ -1550,7 +1559,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   }
 
   // ================= Kalender-heatmap =================
-  const CAL_METRICS = ['happy', 'energie', 'leven', 'prive', 'wStress', 'hrv', 'load', 'hours', 'alcohol'];
+  const CAL_METRICS = ['happy', 'energie', 'leven', 'prive', 'mSlaap', 'wStress', 'hrv', 'load', 'hours', 'alcohol'];
   class CalendarChart {
     constructor(hostId) {
       const host = document.getElementById(hostId);
@@ -1723,7 +1732,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   const CANDIDATES = [
     ['alcohol', 'hrv', 1], ['alcohol', 'happy', 1], ['alcohol', 'energie', 1], ['load', 'hrv', 1], ['load', 'energie', 1],
     ['hours', 'happy', 0], ['wStress', 'hrv', 1], ['wStress', 'happy', 0], ['prive', 'happy', 0], ['prive', 'hrv', 1],
-    ['workload', 'wStress', 0], ['hrv', 'energie', 0], ['ziek', 'happy', 0], ['unclenched', 'happy', 0], ['rhr', 'energie', 0],
+    ['workload', 'wStress', 0], ['hrv', 'energie', 0], ['alcohol', 'mSlaap', 1], ['mSlaap', 'energie', 0], ['mSlaap', 'hrv', 0],
+    ['load', 'mSlaap', 1], ['wStress', 'mSlaap', 1], ['mWakker', 'happy', 0], ['ziek', 'happy', 0], ['unclenched', 'happy', 0], ['rhr', 'energie', 0],
   ];
   function renderFindings() {
     const list = $('#findList');
@@ -1827,6 +1837,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       if (notes) E('p', 'quote', notes, g);
       if (extra) extra(g);
     };
+    group('Ochtend', ['mSlaap', 'mWakker', 'mGevoel'], r.morningNote);
     group('Gevoel', ['happy', 'energie', 'leven', 'prive', 'ziek', 'alcohol'], r.note);
     group('Werk', ['wHappy', 'wStress', 'unclenched', 'workload'], r.workNote);
     group('Lichaam', ['hrv', 'rhr'], null);
@@ -1882,6 +1893,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     } });
   new TimeChart('c-hrv', { id: 'hrv', title: 'HRV (rMSSD)', sub: 'Grijze band: jouw normale bereik (28 dagen, ± 1 sd)', kind: 'line', smooth: true, band: 'hrv', height: () => (isTouchLayout() ? 210 : 240), empty: 'Nog geen HRV-metingen. Staat er een export in Apps › HRV4Training?',
     series: [{ key: 'hrv', label: 'HRV', color: '--s1' }] });
+  new TimeChart('c-ochtend', { id: 'ochtend', title: 'Ochtend', sub: 'Uit Ochtendscore, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Nog geen ochtendscores in deze periode',
+    series: [{ key: 'mSlaap', label: 'Slaap', color: '--s1' }, { key: 'mWakker', label: 'Wakker', color: '--s2' }, { key: 'mGevoel', label: 'Gevoel', color: '--s3' }] });
   new TimeChart('c-rhr', { id: 'rhr', title: 'Rusthartslag', sub: 'Slagen per minuut, ochtendmeting', kind: 'line', smooth: true, height: 180, empty: 'Nog geen rusthartslag-metingen',
     series: [{ key: 'rhr', label: 'Rusthartslag', color: '--s1' }] });
   new TimeChart('c-load', { id: 'load', title: 'Belasting', subFn: (bs) => (bs[0] && bs[0].week ? 'Per week (som)' : 'Per dag, trainingsbelasting'), kind: 'bar', agg: 'auto', height: 200, empty: 'Geen trainingen in deze periode',
@@ -1950,6 +1963,14 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
         catch (e) { status.work = { ok: false, text: e instanceof NeedLogin ? 'Dropbox-koppeling verlopen' : e.message }; }
       })());
       jobs.push((async () => {
+        try { const r = await readScoreFile(CFG.morningPath, CFG.morningName); next.morning = { text: r.text, path: r.path }; status.morning = { ok: true, text: `${r.path}` }; }
+        catch (e) {
+          status.morning = e instanceof NeedLogin ? { ok: false, text: 'Dropbox-koppeling verlopen' }
+            : /niet gevonden/.test(e.message) ? { ok: true, neutral: true, text: 'Nog geen MorningScores.csv; die verschijnt na je eerste ochtendscore' }
+            : { ok: false, text: e.message };
+        }
+      })());
+      jobs.push((async () => {
         try {
           const entries = (await dbxList(CFG.hrvFolder)).filter((e) => e['.tag'] === 'file' && /\.(csv|txt)$/i.test(e.name));
           if (!entries.length) throw new Error('geen exportbestanden in Apps › HRV4Training.');
@@ -2004,10 +2025,10 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     ul.textContent = '';
     const st = RAW.status || {};
     const rows = [
-      ['Dagscores', st.scores, isLinked()], ['Werkscores', st.work, isLinked()], ['HRV4Training', st.hrv, isLinked()], ['intervals.icu', st.icu, !!(icuCfg() && icuCfg().key)],
+      ['Dagscores', st.scores, isLinked()], ['Werkscores', st.work, isLinked()], ['Ochtendscores', st.morning, isLinked()], ['HRV4Training', st.hrv, isLinked()], ['intervals.icu', st.icu, !!(icuCfg() && icuCfg().key)],
     ];
     for (const [name, s, on] of rows) {
-      const li = E('li', s ? (s.ok ? 'ok' : 'err') : '', null, ul);
+      const li = E('li', s ? (s.neutral ? '' : s.ok ? 'ok' : 'err') : '', null, ul);
       E('i', null, null, li);
       const t = E('div', null, null, li);
       E('b', null, name, t);
@@ -2022,8 +2043,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     $('#dbxConnect').hidden = isLinked();
     $('#dbxDisconnect').hidden = !isLinked();
     $('#dbxText').textContent = isLinked()
-      ? 'Gekoppeld. Leest Scores.csv en WorkScores.csv uit Apps › Scores en het nieuwste bestand uit Apps › HRV4Training.'
-      : 'Leest Scores.csv en WorkScores.csv uit Apps › Scores en het nieuwste bestand uit Apps › HRV4Training.';
+      ? 'Gekoppeld. Leest Scores.csv, WorkScores.csv en MorningScores.csv uit Apps › Scores en het nieuwste bestand uit Apps › HRV4Training.'
+      : 'Leest Scores.csv, WorkScores.csv en MorningScores.csv uit Apps › Scores en het nieuwste bestand uit Apps › HRV4Training.';
     const ic = icuCfg();
     $('#icuClear').hidden = !(ic && ic.key);
     $('#icuAthlete').value = (ic && ic.athlete) || '';
