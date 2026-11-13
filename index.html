@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="cf1b3b4d38">
+<meta name="dashboard-versie" content="50fcb43d67">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -476,8 +476,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       <div id="c-hrv"></div>
       <div class="grid-2">
         <div id="c-ochtend"></div>
-        <div id="c-rhr"></div>
+        <div id="c-wakker"></div>
       </div>
+      <div id="c-rhr"></div>
     </section>
 
     <section class="view" id="training" data-view="training">
@@ -819,7 +820,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     unclenched: { label: 'Unclenched', src: 'work', col: 'Unclenched', min: 1, max: 10, good: 'up', d: 1 },
     workload: { label: 'Workload', src: 'work', col: 'Workload', min: 1, max: 10, good: null, d: 1 },
     mSlaap: { label: 'Slaap', src: 'morning', col: 'Slaap', min: 1, max: 10, good: 'up', d: 1 },
-    mWakker: { label: 'Wakker', src: 'morning', col: 'Wakker', min: 1, max: 10, good: 'up', d: 1 },
+    mWakker: { label: 'Wakker', src: 'morning', col: 'Wakker', min: 0, max: 4, zero: true, good: null, d: 1 },
     mGevoel: { label: 'Ochtendgevoel', short: 'Gevoel', src: 'morning', col: 'Gevoel', min: 1, max: 10, good: 'up', d: 1 },
     hrv: { label: 'HRV', unit: 'ms', src: 'body', good: 'up', d: 0 },
     rhr: { label: 'Rusthartslag', unit: 'bpm', src: 'body', good: 'down', d: 0 },
@@ -1893,8 +1894,10 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     } });
   new TimeChart('c-hrv', { id: 'hrv', title: 'HRV (rMSSD)', sub: 'Grijze band: jouw normale bereik (28 dagen, ± 1 sd)', kind: 'line', smooth: true, band: 'hrv', height: () => (isTouchLayout() ? 210 : 240), empty: 'Nog geen HRV-metingen. Staat er een export in Apps › HRV4Training?',
     series: [{ key: 'hrv', label: 'HRV', color: '--s1' }] });
-  new TimeChart('c-ochtend', { id: 'ochtend', title: 'Ochtend', sub: 'Uit Ochtendscore, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Nog geen ochtendscores in deze periode',
-    series: [{ key: 'mSlaap', label: 'Slaap', color: '--s1' }, { key: 'mWakker', label: 'Wakker', color: '--s2' }, { key: 'mGevoel', label: 'Gevoel', color: '--s3' }] });
+  new TimeChart('c-ochtend', { id: 'ochtend', title: 'Ochtend', sub: 'Slaap en gevoel uit Ochtendscore, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Nog geen ochtendscores in deze periode',
+    series: [{ key: 'mSlaap', label: 'Slaap', color: '--s1' }, { key: 'mGevoel', label: 'Gevoel', color: '--s2' }] });
+  new TimeChart('c-wakker', { id: 'wakker', title: 'Wakker', sub: 'Uit Ochtendscore, schaal 0–4', kind: 'line', smooth: true, height: 200, y: [0, 4], yTicks: [0, 1, 2, 3, 4], empty: 'Nog geen ochtendscores in deze periode',
+    series: [{ key: 'mWakker', label: 'Wakker', color: '--s1' }] });
   new TimeChart('c-rhr', { id: 'rhr', title: 'Rusthartslag', sub: 'Slagen per minuut, ochtendmeting', kind: 'line', smooth: true, height: 180, empty: 'Nog geen rusthartslag-metingen',
     series: [{ key: 'rhr', label: 'Rusthartslag', color: '--s1' }] });
   new TimeChart('c-load', { id: 'load', title: 'Belasting', subFn: (bs) => (bs[0] && bs[0].week ? 'Per week (som)' : 'Per dag, trainingsbelasting'), kind: 'bar', agg: 'auto', height: 200, empty: 'Geen trainingen in deze periode',
