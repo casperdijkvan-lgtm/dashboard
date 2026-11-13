@@ -1,0 +1,2147 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dashboard">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f1f1ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="apple-touch-icon.png">
+<meta name="dashboard-versie" content="44f69c347c">
+<style>
+/* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
+   Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
+:root {
+  color-scheme: light;
+  --plane: #f1f1ee;
+  --card: #fcfcfb;
+  --card-2: #f4f4f1;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --hair: rgba(11, 11, 11, .08);
+  --shadow: 0 1px 2px rgba(20, 20, 10, .04), 0 10px 30px rgba(20, 20, 10, .05);
+  --glass: rgba(241, 241, 238, .78);
+  --accent: #2a78d6;
+  --accent-soft: rgba(42, 120, 214, .12);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --pos: #2a78d6; --neg: #e34948;
+  --good: #006300; --bad: #c23a3a;
+  --band: rgba(137, 135, 129, .16);
+  --raw-dot: .3;
+  --q1: #cde2fb; --q2: #9ec5f4; --q3: #6da7ec; --q4: #3987e5; --q5: #256abf; --q6: #184f95; --q7: #0d366b;
+  --o1: #fbdccd; --o2: #ee8350; --o3: #c9521f; --o4: #8f3814;
+  --a1: #86b6ef; --a2: #5598e7; --a3: #2a78d6; --a4: #1c5cab; --a5: #104281;
+  --radius: 20px;
+  --font: system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --plane: #0d0d0d; --card: #1a1a19; --card-2: #232321;
+    --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781; --grid: #2c2c2a; --axis: #383835;
+    --hair: rgba(255, 255, 255, .08); --shadow: 0 1px 0 rgba(255, 255, 255, .03) inset;
+    --glass: rgba(13, 13, 13, .72);
+    --accent: #3987e5; --accent-soft: rgba(57, 135, 229, .18);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --pos: #3987e5; --neg: #e66767;
+    --good: #0ca30c; --bad: #ef6b6b;
+    --band: rgba(195, 194, 183, .12);
+    --q1: #104281; --q2: #184f95; --q3: #256abf; --q4: #3987e5; --q5: #6da7ec; --q6: #9ec5f4; --q7: #cde2fb;
+    --o1: #5c2a13; --o2: #a8441c; --o3: #d95926; --o4: #f5a988;
+    --a1: #184f95; --a2: #256abf; --a3: #3987e5; --a4: #6da7ec; --a5: #b7d3f6;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --plane: #0d0d0d; --card: #1a1a19; --card-2: #232321;
+  --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781; --grid: #2c2c2a; --axis: #383835;
+  --hair: rgba(255, 255, 255, .08); --shadow: 0 1px 0 rgba(255, 255, 255, .03) inset;
+  --glass: rgba(13, 13, 13, .72);
+  --accent: #3987e5; --accent-soft: rgba(57, 135, 229, .18);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --pos: #3987e5; --neg: #e66767;
+  --good: #0ca30c; --bad: #ef6b6b;
+  --band: rgba(195, 194, 183, .12);
+  --q1: #104281; --q2: #184f95; --q3: #256abf; --q4: #3987e5; --q5: #6da7ec; --q6: #9ec5f4; --q7: #cde2fb;
+  --o1: #5c2a13; --o2: #a8441c; --o3: #d95926; --o4: #f5a988;
+    --a1: #184f95; --a2: #256abf; --a3: #3987e5; --a4: #6da7ec; --a5: #b7d3f6;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 132px; }
+body {
+  margin: 0;
+  background: var(--plane);
+  color: var(--ink);
+  font: 15px/1.45 var(--font);
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+.wrap {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Kop ---------- */
+.app-head {
+  position: sticky; top: 0; z-index: 30;
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(1.8) blur(22px);
+  backdrop-filter: saturate(1.8) blur(22px);
+  border-bottom: 1px solid var(--hair);
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.bar { display: flex; align-items: center; gap: 12px; min-height: 52px; }
+.brand { display: flex; align-items: center; gap: 10px; margin-right: 8px; }
+.brand-mark {
+  width: 28px; height: 28px; border-radius: 8px; flex: none;
+  background: linear-gradient(160deg, var(--s1), #1c5cab);
+  position: relative; overflow: hidden;
+}
+.brand-mark::after {
+  content: ""; position: absolute; left: 6px; right: 6px; bottom: 7px; height: 12px;
+  border-left: 2px solid #fff; border-bottom: 2px solid #fff; border-radius: 0 0 0 3px; opacity: .0;
+}
+.brand-mark svg { position: absolute; inset: 0; }
+.brand h1 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+.desk-nav { display: flex; gap: 2px; }
+.desk-nav a {
+  color: var(--ink-2); text-decoration: none; font-size: 14px; font-weight: 500;
+  padding: 6px 11px; border-radius: 999px;
+}
+.desk-nav a:hover { background: var(--card-2); color: var(--ink); }
+.desk-nav a.on { color: var(--ink); background: var(--card-2); }
+.spacer { flex: 1; }
+.stepper { display: flex; align-items: center; gap: 2px; }
+.range-label {
+  border: 0; background: transparent; cursor: pointer;
+  font-size: 15px; font-weight: 600; letter-spacing: -.01em; padding: 6px 8px; border-radius: 10px;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.range-label:hover { background: var(--card-2); }
+.icon-btn {
+  width: 36px; height: 36px; border: 0; background: transparent; border-radius: 10px;
+  display: inline-grid; place-items: center; cursor: pointer; color: var(--ink-2); flex: none;
+}
+.icon-btn:hover:not(:disabled) { background: var(--card-2); color: var(--ink); }
+.icon-btn:disabled { opacity: .35; cursor: default; }
+.icon-btn svg { width: 20px; height: 20px; }
+.icon-btn.busy svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.sync { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.sync.err { color: var(--bad); }
+
+.filters { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; flex-wrap: wrap; }
+.seg {
+  display: inline-flex; padding: 3px; gap: 2px; border-radius: 12px; background: var(--card-2);
+  border: 1px solid var(--hair);
+}
+.seg button {
+  border: 0; background: transparent; border-radius: 9px; padding: 6px 12px; cursor: pointer;
+  font-size: 13.5px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums;
+  transition: background-color .15s, color .15s, box-shadow .15s;
+}
+.seg button[aria-checked="true"] {
+  background: var(--card); color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .08), 0 0 0 1px var(--hair);
+}
+.toggle {
+  display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--hair); background: var(--card-2);
+  border-radius: 12px; padding: 6px 12px; cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--ink-2);
+}
+.toggle svg { width: 18px; height: 18px; }
+.toggle[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.chip-btn {
+  border: 1px solid var(--hair); background: var(--card); color: var(--ink-2); cursor: pointer;
+  border-radius: 999px; padding: 4px 11px; font-size: 12.5px; font-weight: 600;
+}
+.chip-btn:hover { color: var(--ink); }
+.chip-btn[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: transparent; }
+.seg button:focus-visible, .chip-btn:focus-visible, .icon-btn:focus-visible, .toggle:focus-visible,
+.range-label:focus-visible, .plot:focus-visible, .tab:focus-visible, .btn:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+/* ---------- Opbouw ---------- */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; padding-top: 20px; padding-bottom: 48px; }
+main { min-width: 0; display: flex; flex-direction: column; gap: 36px; }
+.view { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sec-title { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+.sec-note { margin: 0; color: var(--muted); font-size: 13px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.span-2 { grid-column: span 2; }
+
+.card {
+  background: var(--card); border: 1px solid var(--hair); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 16px 16px 14px; min-width: 0; position: relative;
+}
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.card-titles { min-width: 0; }
+.card h3 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+.card-sub { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+.card-actions { display: flex; gap: 6px; flex: none; align-items: center; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; }
+.legend button {
+  border: 0; background: transparent; padding: 2px 0; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; color: var(--ink-2); font-weight: 500;
+}
+.legend button[aria-pressed="false"] { opacity: .4; }
+.legend i { display: inline-block; width: 14px; height: 2px; border-radius: 2px; }
+.legend i.box { width: 10px; height: 10px; border-radius: 3px; }
+.plot { position: relative; margin-top: 10px; outline: none; user-select: none; -webkit-user-select: none; touch-action: pan-y; }
+.plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.plot.stale svg { opacity: .55; transition: opacity .2s; }
+.axis-text { font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.end-label { font-size: 11.5px; font-weight: 600; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+.cap-label { font-size: 11px; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+.empty-msg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 13px; text-align: center; padding: 0 20px; }
+.tip {
+  position: absolute; z-index: 5; pointer-events: none; min-width: 150px; max-width: 240px;
+  background: var(--card); border: 1px solid var(--hair); border-radius: 12px; padding: 9px 11px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .14);
+}
+.tip-date { font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
+.tip-row { display: grid; grid-template-columns: 14px auto 1fr; align-items: center; gap: 7px; font-size: 12.5px; line-height: 1.55; }
+.tip-row i { display: block; width: 12px; height: 2px; border-radius: 2px; }
+.tip-row i.box { width: 9px; height: 9px; border-radius: 2px; }
+.tip-row b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.tip-row span { color: var(--ink-2); }
+.table-box { margin-top: 10px; max-height: 320px; overflow: auto; border-radius: 10px; border: 1px solid var(--hair); }
+.table-box table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.table-box th, .table-box td { padding: 6px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--hair); }
+.table-box th:first-child, .table-box td:first-child { text-align: left; }
+.table-box th { position: sticky; top: 0; background: var(--card-2); font-weight: 600; color: var(--ink-2); }
+
+/* ---------- Tegels ---------- */
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.tile { padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 2px; cursor: default; }
+.tile-label { font-size: 12.5px; color: var(--ink-2); font-weight: 550; display: flex; justify-content: space-between; gap: 6px; }
+.tile-label em { font-style: normal; color: var(--muted); font-weight: 450; }
+.tile-value { font-size: 30px; font-weight: 650; letter-spacing: -.02em; line-height: 1.15; margin-top: 4px; }
+.tile-value small { font-size: 14px; font-weight: 550; color: var(--muted); margin-left: 3px; letter-spacing: 0; }
+.tile-delta { font-size: 12px; color: var(--ink-2); display: flex; align-items: center; gap: 4px; min-height: 18px; }
+.tile-delta.good { color: var(--good); }
+.tile-delta.bad { color: var(--bad); }
+.tile-delta svg { width: 10px; height: 10px; flex: none; }
+.tile-delta span { color: var(--muted); font-weight: 400; }
+.tile-delta .short { display: none; }
+.sec-head { flex-wrap: wrap; }
+.tile svg.spark { width: 100%; height: 34px; margin-top: 6px; display: block; overflow: visible; }
+
+/* ---------- Lijsten ---------- */
+.notes { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; }
+.notes li { padding: 10px 0; border-top: 1px solid var(--hair); display: grid; grid-template-columns: 72px 1fr; gap: 10px; cursor: pointer; }
+.notes li:first-child { border-top: 0; }
+.notes li:hover .note-text { color: var(--ink); }
+.note-date { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.note-text { font-size: 14px; color: var(--ink-2); }
+.note-tag { display: inline-block; font-size: 11px; font-weight: 600; color: var(--muted); margin-right: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.findings { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.finding { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; cursor: pointer; padding: 8px; margin: -8px; border-radius: 12px; }
+.finding:hover { background: var(--card-2); }
+.finding svg { width: 44px; height: 44px; }
+.finding p { margin: 0; font-size: 14px; color: var(--ink); }
+.finding small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.muted-p { margin: 10px 0 0; color: var(--muted); font-size: 13.5px; }
+
+.explorer-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+.explorer-controls label { font-size: 12.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+select {
+  font: inherit; font-size: 13.5px; font-weight: 550; color: var(--ink); background: var(--card-2);
+  border: 1px solid var(--hair); border-radius: 10px; padding: 5px 28px 5px 10px; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%; background-size: 5px 5px; background-repeat: no-repeat;
+}
+.stat-line { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-2); }
+.stat-line b { color: var(--ink); font-weight: 650; }
+.scale-legend { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+.scale-legend i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
+
+/* ---------- Dagpaneel en blad ---------- */
+.day-panel { position: sticky; top: 140px; max-height: calc(100vh - 160px); overflow: auto; }
+.day-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.day-head h3 { font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+.day-kicker { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.day-group { margin-top: 16px; }
+.day-group h4 { margin: 0 0 6px; font-size: 12px; color: var(--muted); font-weight: 650; text-transform: uppercase; letter-spacing: .06em; }
+.kv { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 14px; }
+.kv dt { color: var(--ink-2); }
+.kv dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+.kv dd small { color: var(--muted); font-weight: 450; margin-left: 4px; }
+.quote { margin: 8px 0 0; padding: 9px 12px; background: var(--card-2); border-radius: 12px; font-size: 14px; color: var(--ink); }
+.acts { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.acts li { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; padding: 8px 10px; background: var(--card-2); border-radius: 10px; }
+.acts li span { color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acts li b { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.day-empty { color: var(--muted); font-size: 13.5px; margin: 12px 0 0; }
+.day-nav { display: flex; gap: 4px; }
+
+.sheet-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .32); z-index: 60; opacity: 0; transition: opacity .2s; }
+.sheet-backdrop.open { opacity: 1; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 61; max-height: 86vh; overflow: auto;
+  background: var(--card); border-radius: 22px 22px 0 0; box-shadow: 0 -10px 40px rgba(0, 0, 0, .2);
+  padding: 8px max(18px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  transform: translateY(100%); transition: transform .28s cubic-bezier(.2, .8, .2, 1);
+}
+.sheet.open { transform: translateY(0); }
+.sheet-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-bottom: 4px; }
+.sheet-grip { width: 38px; height: 5px; border-radius: 3px; background: var(--axis); }
+.sheet-done { justify-self: end; border: 0; background: transparent; color: var(--accent); font-weight: 650; font-size: 16px; padding: 8px 0 8px 12px; cursor: pointer; }
+
+/* ---------- Instellingen ---------- */
+dialog#settings {
+  border: 0; padding: 0; border-radius: 22px; background: var(--card); color: var(--ink);
+  width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 40px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .3);
+}
+dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.set-inner { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 18px; }
+.set-head { display: flex; justify-content: space-between; align-items: center; }
+.set-head h2 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+.set-block { border: 1px solid var(--hair); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.set-block h3 { margin: 0; font-size: 15px; font-weight: 650; }
+.set-block p { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-2); font-weight: 550; }
+.field input {
+  font: inherit; font-size: 15px; color: var(--ink); background: var(--card-2); border: 1px solid var(--hair);
+  border-radius: 10px; padding: 8px 10px;
+}
+.field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  border: 0; border-radius: 12px; padding: 9px 14px; font-weight: 650; font-size: 14px; cursor: pointer;
+  background: var(--card-2); color: var(--ink);
+}
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.danger { color: var(--bad); }
+.src-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.src-list li { display: grid; grid-template-columns: 10px 1fr; gap: 10px; font-size: 13.5px; align-items: start; }
+.src-list li i { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; background: var(--muted); }
+.src-list li.ok i { background: #0ca30c; }
+.src-list li.err i { background: #d03b3b; }
+.src-list li b { font-weight: 600; }
+.src-list li span { display: block; color: var(--ink-2); font-size: 12.5px; }
+
+/* ---------- Welkom ---------- */
+.welcome { padding: 28px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.welcome h2 { margin: 0; font-size: 26px; font-weight: 750; letter-spacing: -.02em; }
+.welcome p { margin: 0; color: var(--ink-2); max-width: 60ch; }
+
+/* ---------- Tabbalk (iPhone) ---------- */
+.tabbar { display: none; }
+
+/* ---------- Middelgroot: geen zijpaneel ---------- */
+@media (max-width: 1180px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .day-panel { display: none; }
+}
+@media (max-width: 1000px) {
+  .desk-nav { display: none; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---------- iPhone ---------- */
+@media (max-width: 760px) {
+  html { scroll-padding-top: 110px; }
+  body { font-size: 15px; }
+  .bar { min-height: 48px; gap: 4px; }
+  .brand h1, .sync { display: none; }
+  .brand { margin-right: 0; }
+  .stepper { flex: 1; justify-content: center; }
+  .range-label { font-size: 16px; }
+  .filters { flex-wrap: nowrap; gap: 8px; padding-bottom: 8px; }
+  .seg { flex: 1; }
+  .seg button { flex: 1; padding: 6px 0; font-size: 13px; }
+  .toggle span { display: none; }
+  .toggle { padding: 6px 9px; }
+  #resetZoom { display: none; }
+  .layout { padding-top: 14px; padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  main { gap: 0; }
+  .view { display: none; gap: 12px; }
+  .view.active { display: flex; }
+  .sec-title { font-size: 28px; }
+  .grid-2, .grid-3 { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .span-2 { grid-column: auto; }
+  .card { padding: 14px 14px 12px; border-radius: 18px; }
+  .tiles { gap: 10px; }
+  .tile { padding: 12px 12px 8px; }
+  .tile-value { font-size: 26px; }
+  .tile-delta .long { display: none; }
+  .tile-delta .short { display: inline; }
+  .sec-head { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .tabbar {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px);
+    border-top: 1px solid var(--hair);
+    padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+  }
+  .tab {
+    border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    font-size: 10.5px; font-weight: 600; color: var(--muted); padding: 4px 0; cursor: pointer;
+  }
+  .tab svg { width: 24px; height: 24px; }
+  .tab[aria-selected="true"] { color: var(--accent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, .sheet, .sheet-backdrop { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="app-head">
+  <div class="bar wrap">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M6 19 L11 13 L15 16 L22 8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <h1>Dashboard</h1>
+    </div>
+    <nav class="desk-nav" aria-label="Onderdelen">
+      <a href="#overzicht" data-nav="overzicht">Overzicht</a>
+      <a href="#welzijn" data-nav="welzijn">Welzijn</a>
+      <a href="#lichaam" data-nav="lichaam">Lichaam</a>
+      <a href="#training" data-nav="training">Training</a>
+      <a href="#inzicht" data-nav="inzicht">Inzicht</a>
+    </nav>
+    <span class="spacer"></span>
+    <div class="stepper">
+      <button class="icon-btn" id="prevBtn" type="button" aria-label="Vorige periode"><svg viewBox="0 0 20 20"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="range-label" id="rangeLabel" type="button" title="Terug naar de laatste dagen">–</button>
+      <button class="icon-btn" id="nextBtn" type="button" aria-label="Volgende periode"><svg viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <span class="spacer"></span>
+    <span class="sync" id="syncState" aria-live="polite"></span>
+    <button class="icon-btn" id="refreshBtn" type="button" aria-label="Gegevens vernieuwen"><svg viewBox="0 0 20 20"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 3.5V7h-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="icon-btn" id="settingsBtn" type="button" aria-label="Instellingen en bronnen"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="filters wrap">
+    <div class="seg" id="rangeSeg" role="radiogroup" aria-label="Periode"></div>
+    <button class="toggle" id="smoothBtn" type="button" aria-pressed="true" title="7-daags gemiddelde">
+      <svg viewBox="0 0 20 20"><path d="M2.5 12c2.5 0 2.5-5 5-5s2.5 6 5 6 2.5-4 5-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>7-daags gemiddelde</span>
+    </button>
+    <button class="chip-btn" id="resetZoom" type="button" hidden>Zoom resetten</button>
+    <span class="sec-note" id="zoomHint">Sleep in een grafiek om in te zoomen</span>
+  </div>
+</header>
+
+<div class="layout wrap">
+  <main id="main">
+    <div class="card welcome" id="welcome" hidden>
+      <h2>Welkom bij je dashboard</h2>
+      <p>Koppel Dropbox voor je dagscores, werkscores en HRV4Training-metingen, en intervals.icu voor je trainingsuren en belasting. Je gegevens blijven tussen je browser en die diensten; deze pagina bewaart niets op een server.</p>
+      <div class="row-btns">
+        <button class="btn primary" id="welcomeDbx" type="button">Koppel Dropbox</button>
+        <button class="btn" id="welcomeSettings" type="button">intervals.icu instellen</button>
+      </div>
+    </div>
+
+    <section class="view" id="overzicht" data-view="overzicht">
+      <div class="sec-head"><h2 class="sec-title">Overzicht</h2><p class="sec-note" id="overNote"></p></div>
+      <div class="tiles" id="tiles"></div>
+      <div class="grid-2">
+        <div class="card" id="findCard"><div class="card-head"><div class="card-titles"><h3>Opvallend</h3><p class="card-sub">Samenhang in de gekozen periode, geen oorzaak</p></div></div><ul class="findings" id="findList"></ul></div>
+        <div class="card" id="notesCard"><div class="card-head"><div class="card-titles"><h3>Laatste notities</h3><p class="card-sub">Uit je dagscores en werkscores</p></div></div><ul class="notes" id="noteList"></ul></div>
+      </div>
+    </section>
+
+    <section class="view" id="welzijn" data-view="welzijn">
+      <div class="sec-head"><h2 class="sec-title">Welzijn</h2></div>
+      <div id="c-gevoel"></div>
+      <div class="grid-2">
+        <div id="c-stress"></div>
+        <div id="c-werk"></div>
+      </div>
+      <div id="c-strip"></div>
+    </section>
+
+    <section class="view" id="lichaam" data-view="lichaam">
+      <div class="sec-head"><h2 class="sec-title">Lichaam</h2><p class="sec-note" id="hrvSource"></p></div>
+      <div id="c-hrv"></div>
+      <div id="c-rhr"></div>
+    </section>
+
+    <section class="view" id="training" data-view="training">
+      <div class="sec-head"><h2 class="sec-title">Training</h2><p class="sec-note">Bron: intervals.icu</p></div>
+      <div class="card" id="icuMissing" hidden>
+        <h3>Koppel intervals.icu</h3>
+        <p class="muted-p">Vul in Instellingen je API-sleutel van intervals.icu in. Die vind je op intervals.icu onder Settings › Developer Settings.</p>
+        <div class="row-btns" style="margin-top:12px"><button class="btn primary" type="button" data-open-settings>Instellingen openen</button></div>
+      </div>
+      <div class="grid-2">
+        <div id="c-load"></div>
+        <div id="c-hours"></div>
+      </div>
+      <div class="grid-2">
+        <div id="c-fit"></div>
+        <div id="c-form"></div>
+      </div>
+    </section>
+
+    <section class="view" id="inzicht" data-view="inzicht">
+      <div class="sec-head"><h2 class="sec-title">Inzicht</h2></div>
+      <div class="grid-2">
+        <div id="c-scatter"></div>
+        <div id="c-cal"></div>
+      </div>
+      <div class="card" id="diaryCard"><div class="card-head"><div class="card-titles"><h3>Dagboek</h3><p class="card-sub" id="diarySub">Alle notities in de gekozen periode</p></div></div><ul class="notes" id="diaryList"></ul></div>
+    </section>
+  </main>
+  <aside class="card day-panel" id="dayPanel" aria-live="polite"></aside>
+</div>
+
+<nav class="tabbar" id="tabbar" role="tablist" aria-label="Onderdelen">
+  <button class="tab" type="button" role="tab" data-tab="overzicht"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>Overzicht</button>
+  <button class="tab" type="button" role="tab" data-tab="welzijn"><svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Welzijn</button>
+  <button class="tab" type="button" role="tab" data-tab="lichaam"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Lichaam</button>
+  <button class="tab" type="button" role="tab" data-tab="training"><svg viewBox="0 0 24 24"><path d="M5 19V11M10 19V6M15 19v-5M20 19V9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>Training</button>
+  <button class="tab" type="button" role="tab" data-tab="inzicht"><svg viewBox="0 0 24 24"><circle cx="7" cy="16" r="1.6" fill="currentColor"/><circle cx="11" cy="11" r="1.6" fill="currentColor"/><circle cx="15" cy="13" r="1.6" fill="currentColor"/><circle cx="18" cy="7" r="1.6" fill="currentColor"/><path d="M4 20h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Inzicht</button>
+</nav>
+
+<div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Dagdetail" hidden>
+  <div class="sheet-top"><span></span><div class="sheet-grip" aria-hidden="true"></div><button class="sheet-done" type="button" id="sheetDone">Klaar</button></div>
+  <div id="sheetBody"></div>
+</section>
+
+<dialog id="settings" aria-label="Instellingen">
+  <div class="set-inner">
+    <div class="set-head"><h2>Instellingen</h2><button class="icon-btn" type="button" id="closeSettings" aria-label="Sluiten"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+    <div class="set-block">
+      <h3>Dropbox</h3>
+      <p id="dbxText">Leest Scores.csv en WorkScores.csv uit Apps › Scores en het nieuwste bestand uit Apps › HRV4Training.</p>
+      <div class="row-btns"><button class="btn primary" type="button" id="dbxConnect">Koppel Dropbox</button><button class="btn danger" type="button" id="dbxDisconnect" hidden>Ontkoppelen</button></div>
+    </div>
+    <div class="set-block">
+      <h3>intervals.icu</h3>
+      <p>Voor trainingsuren, belasting, fitness en vorm. De sleutel blijft alleen in deze browser op dit apparaat.</p>
+      <label class="field">API-sleutel<input type="password" id="icuKey" autocomplete="off" spellcheck="false" placeholder="Settings › Developer Settings"></label>
+      <label class="field">Athlete-ID (optioneel)<input type="text" id="icuAthlete" autocomplete="off" spellcheck="false" placeholder="bijv. i123456 — leeg laten werkt meestal ook"></label>
+      <div class="row-btns"><button class="btn primary" type="button" id="icuSave">Opslaan en ophalen</button><button class="btn danger" type="button" id="icuClear" hidden>Verwijderen</button></div>
+    </div>
+    <div class="set-block">
+      <h3>Bronnen</h3>
+      <ul class="src-list" id="srcList"></ul>
+      <div class="row-btns"><button class="btn" type="button" id="settingsRefresh">Nu vernieuwen</button></div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  'use strict';
+
+  // ================= Instellingen =================
+  const CFG = {
+    dropboxKey: 'jvqh2qs61dyyqnp',
+    scoresName: 'Scores.csv',
+    workName: 'WorkScores.csv',
+    scoresPath: '/Apps/Scores/Scores.csv',
+    workPath: '/Apps/Scores/WorkScores.csv',
+    hrvFolder: '/Apps/HRV4Training',
+    icuDays: 420,
+  };
+  const K = {
+    auth: 'dashboard.dropbox.v1', pkce: 'dashboard.pkce.v1', icu: 'dashboard.icu.v1', cache: 'dashboard.cache.v2',
+    range: 'dashboard.range.v1', smooth: 'dashboard.smooth.v1', tab: 'dashboard.tab.v1', hidden: 'dashboard.hidden.v1',
+    scatter: 'dashboard.scatter.v1', cal: 'dashboard.cal.v1',
+  };
+
+  // ================= Hulpjes =================
+  const $ = (s, r = document) => r.querySelector(s);
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  function S(tag, attrs, parent) {
+    const e = document.createElementNS(SVGNS, tag);
+    if (attrs) for (const k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function E(tag, cls, text, parent) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  const store = {
+    get(k, d = null) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* vol of geblokkeerd */ } },
+    del(k) { try { localStorage.removeItem(k); } catch (e) { /* */ } },
+  };
+  const isTouchLayout = () => window.matchMedia('(max-width: 760px)').matches;
+  const isWide = () => window.matchMedia('(min-width: 1181px)').matches;
+
+  // Datums als 'YYYY-MM-DD' (lokale tijd)
+  const pad = (n) => String(n).padStart(2, '0');
+  const isoOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const dateOf = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const addDays = (s, n) => { const d = dateOf(s); d.setDate(d.getDate() + n); return isoOf(d); };
+  const dayDiff = (a, b) => Math.round((dateOf(b) - dateOf(a)) / 864e5);
+  const todayISO = () => isoOf(new Date());
+  const fmtDate = (s, o) => dateOf(s).toLocaleDateString('nl-NL', o);
+  const weekStartOf = (s) => { const d = dateOf(s); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return isoOf(d); };
+  function eachDay(a, b) { const out = []; for (let s = a; s <= b; s = addDays(s, 1)) out.push(s); return out; }
+  const isoWeek = (s) => {
+    const d = dateOf(s); d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+    const w1 = new Date(d.getFullYear(), 0, 4);
+    return 1 + Math.round(((d - w1) / 864e5 - 3 + ((w1.getDay() + 6) % 7)) / 7);
+  };
+
+  const NF = [0, 1, 2].map((d) => new Intl.NumberFormat('nl-NL', { maximumFractionDigits: d }));
+  const fmt = (v, d = 1) => (v == null || !isFinite(v) ? '–' : NF[Math.max(0, Math.min(2, d))].format(v));
+  const fmtSigned = (v, d = 1) => (v > 0 ? '+' : v < 0 ? '−' : '±') + NF[d].format(Math.abs(v));
+  const fmtHours = (h) => {
+    if (h == null) return '–';
+    const m = Math.round(h * 60);
+    return m < 60 ? `${m} min` : `${Math.floor(m / 60)}u${m % 60 ? ' ' + pad(m % 60) : ''}`;
+  };
+  const num = (s) => {
+    if (s == null) return null;
+    const t = String(s).trim().replace(',', '.');
+    if (t === '') return null;
+    const v = Number(t);
+    return isFinite(v) ? v : null;
+  };
+  const mean = (a) => (a.length ? a.reduce((s, v) => s + v, 0) / a.length : null);
+
+  // ================= CSV =================
+  function parseDelimited(text) {
+    text = String(text || '').replace(/^﻿/, '');
+    const first = text.split(/\r?\n/, 1)[0] || '';
+    const counts = [[';', (first.match(/;/g) || []).length], [',', (first.match(/,/g) || []).length], ['\t', (first.match(/\t/g) || []).length]];
+    const delim = counts.sort((a, b) => b[1] - a[1])[0][0];
+    const rows = []; let row = [], f = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c;
+        continue;
+      }
+      if (c === '"' && f === '') q = true;
+      else if (c === delim) { row.push(f); f = ''; }
+      else if (c === '\n') { row.push(f); rows.push(row); row = []; f = ''; }
+      else if (c !== '\r') f += c;
+    }
+    if (f !== '' || row.length) { row.push(f); rows.push(row); }
+    const body = rows.filter((r) => r.some((x) => x.trim() !== ''));
+    if (!body.length) return { header: [], rows: [] };
+    return { header: body[0].map((h) => h.trim()), rows: body.slice(1) };
+  }
+  // Datum in allerlei vormen; bij dd/mm vs mm/dd kiest het de lezing die het best oploopt
+  function dateParser(samples) {
+    const tryParse = (s, order) => {
+      s = String(s || '').trim();
+      let m = s.match(/^(\d{4})[-/._](\d{1,2})[-/._](\d{1,2})/);
+      if (m) return `${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+      m = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})/);
+      if (m) {
+        const y = m[3].length === 2 ? '20' + m[3] : m[3];
+        const [d, mo] = order === 'mdy' ? [+m[2], +m[1]] : [+m[1], +m[2]];
+        if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+        return `${y}-${pad(mo)}-${pad(d)}`;
+      }
+      const t = Date.parse(s);
+      return isNaN(t) ? null : isoOf(new Date(t));
+    };
+    const score = (order) => {
+      let bad = 0, prev = null, valid = 0;
+      for (const s of samples) {
+        const d = tryParse(s, order);
+        if (!d) { bad += 2; continue; }
+        valid++;
+        if (prev && d < prev) bad++;
+        prev = d;
+      }
+      return bad - valid * 0.001;
+    };
+    const order = score('dmy') <= score('mdy') ? 'dmy' : 'mdy';
+    return (s) => tryParse(s, order);
+  }
+  const findCol = (header, tests, avoid) => {
+    for (const t of tests) {
+      const i = header.findIndex((h) => t.test(h) && !(avoid && avoid.test(h)));
+      if (i >= 0) return i;
+    }
+    return -1;
+  };
+
+  // ================= Dropbox (PKCE, alleen lezen) =================
+  class NeedLogin extends Error {}
+  const REDIRECT = location.origin + location.pathname;
+  const loadAuth = () => store.get(K.auth);
+  const saveAuth = (a) => (a ? store.set(K.auth, a) : store.del(K.auth));
+  const isLinked = () => !!loadAuth();
+  const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const randomString = (n) => { const a = new Uint8Array(n); crypto.getRandomValues(a); return b64url(a).slice(0, n); };
+
+  async function startLogin() {
+    const verifier = randomString(64);
+    const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
+    const state = randomString(16);
+    store.set(K.pkce, { verifier, state, redirect: REDIRECT });
+    const p = new URLSearchParams({ client_id: CFG.dropboxKey, response_type: 'code', code_challenge: challenge,
+      code_challenge_method: 'S256', redirect_uri: REDIRECT, token_access_type: 'offline', state });
+    location.href = 'https://www.dropbox.com/oauth2/authorize?' + p;
+  }
+  async function tokenRequest(params) {
+    const res = await fetch('https://api.dropboxapi.com/oauth2/token', { method: 'POST', body: new URLSearchParams(params) });
+    return { ok: res.ok, status: res.status, body: await res.json().catch(() => ({})) };
+  }
+  async function finishLogin() {
+    const q = new URLSearchParams(location.search);
+    if (!q.has('code') && !q.has('error')) return false;
+    history.replaceState(null, '', location.pathname);
+    if (q.has('error')) throw new Error(q.get('error_description') || q.get('error'));
+    const pk = store.get(K.pkce);
+    if (!pk || pk.state !== q.get('state')) throw new Error('de inlogsessie is verlopen. Probeer het opnieuw.');
+    const r = await tokenRequest({ code: q.get('code'), grant_type: 'authorization_code', client_id: CFG.dropboxKey,
+      code_verifier: pk.verifier, redirect_uri: pk.redirect });
+    if (!r.ok) throw new Error(r.body.error_description || 'Dropbox gaf fout ' + r.status);
+    saveAuth({ access: r.body.access_token, refresh: r.body.refresh_token, exp: Date.now() + ((r.body.expires_in || 14400) - 60) * 1000 });
+    store.del(K.pkce);
+    return true;
+  }
+  async function accessToken() {
+    const a = loadAuth();
+    if (!a) throw new NeedLogin();
+    if (a.access && a.exp > Date.now()) return a.access;
+    const r = await tokenRequest({ grant_type: 'refresh_token', refresh_token: a.refresh, client_id: CFG.dropboxKey });
+    if (!r.ok) {
+      if (r.status === 400 || r.status === 401) { saveAuth(null); throw new NeedLogin(); }
+      throw new Error('Dropbox is niet bereikbaar.');
+    }
+    a.access = r.body.access_token;
+    a.exp = Date.now() + ((r.body.expires_in || 14400) - 60) * 1000;
+    saveAuth(a);
+    return a.access;
+  }
+  function dbxError(res, body) {
+    const sum = body.error_summary || '';
+    if (/missing_scope/.test(sum)) return new Error('de Dropbox-app mist rechten (files.metadata.read en files.content.read).');
+    return Object.assign(new Error(sum || 'Dropbox gaf fout ' + res.status), { summary: sum });
+  }
+  async function dbxRpc(endpoint, body) {
+    let res;
+    try {
+      res = await fetch('https://api.dropboxapi.com/2/' + endpoint, { method: 'POST',
+        headers: { Authorization: 'Bearer ' + await accessToken(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    } catch (e) { if (e instanceof NeedLogin) throw e; throw new Error('geen verbinding met Dropbox.'); }
+    if (res.status === 401) { saveAuth(null); throw new NeedLogin(); }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw dbxError(res, data);
+    return data;
+  }
+  async function dbxDownload(path) {
+    let res;
+    try {
+      res = await fetch('https://content.dropboxapi.com/2/files/download', { method: 'POST',
+        headers: { Authorization: 'Bearer ' + await accessToken(), 'Dropbox-API-Arg': JSON.stringify({ path }) } });
+    } catch (e) { if (e instanceof NeedLogin) throw e; throw new Error('geen verbinding met Dropbox.'); }
+    if (res.status === 401) { saveAuth(null); throw new NeedLogin(); }
+    if (res.status === 409) {
+      const b = await res.json().catch(() => ({}));
+      if (/not_found/.test(b.error_summary || '')) return null;
+      throw dbxError(res, b);
+    }
+    if (!res.ok) throw new Error('Dropbox gaf fout ' + res.status);
+    return res.text();
+  }
+  async function dbxList(path) {
+    let r = await dbxRpc('files/list_folder', { path });
+    const out = [...r.entries];
+    while (r.has_more) { r = await dbxRpc('files/list_folder/continue', { cursor: r.cursor }); out.push(...r.entries); }
+    return out;
+  }
+  async function dbxFind(name) {
+    const r = await dbxRpc('files/search_v2', { query: name, options: { filename_only: true, max_results: 25 } });
+    const files = (r.matches || []).map((m) => m.metadata && m.metadata.metadata)
+      .filter((m) => m && m['.tag'] === 'file' && m.name.toLowerCase() === name.toLowerCase());
+    files.sort((a, b) => (b.server_modified || '').localeCompare(a.server_modified || ''));
+    return files[0] ? files[0].path_lower : null;
+  }
+  async function readScoreFile(path, name) {
+    let text = await dbxDownload(path);
+    let used = path;
+    if (text == null) {
+      const found = await dbxFind(name).catch(() => null);
+      if (found) { text = await dbxDownload(found); used = found; }
+    }
+    if (text == null) throw new Error(`${name} niet gevonden. Heeft de Dropbox-app toegang tot je hele Dropbox?`);
+    return { text, path: used };
+  }
+
+  // ================= intervals.icu =================
+  const icuCfg = () => store.get(K.icu);
+  async function icuGet(path, params) {
+    const c = icuCfg();
+    const id = (c.athlete || '0').trim() || '0';
+    const url = `https://intervals.icu/api/v1/athlete/${encodeURIComponent(id)}/${path}?${new URLSearchParams(params)}`;
+    let res;
+    try { res = await fetch(url, { headers: { Authorization: 'Basic ' + btoa('API_KEY:' + c.key) } }); }
+    catch (e) { throw new Error('geen verbinding met intervals.icu.'); }
+    if (res.status === 401 || res.status === 403) throw new Error('intervals.icu weigert de API-sleutel.');
+    if (res.status === 404) throw new Error('athlete-ID niet gevonden bij intervals.icu.');
+    if (!res.ok) throw new Error('intervals.icu gaf fout ' + res.status + '.');
+    return res.json();
+  }
+
+  // ================= Meetwaarden =================
+  const M = {
+    happy: { label: 'Happyness', short: 'Happy', src: 'scores', col: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
+    energie: { label: 'Energie', src: 'scores', col: 'Energie', min: 1, max: 10, good: 'up', d: 1 },
+    leven: { label: 'Levenscontentheid', short: 'Leven', src: 'scores', col: 'Levenscontentheid', min: 1, max: 10, good: 'up', d: 1 },
+    prive: { label: 'Privéstress', short: 'Privé', src: 'scores', col: 'Privestress', min: 1, max: 10, good: 'down', d: 1 },
+    ziek: { label: 'Ziek', src: 'scores', col: 'Ziek', min: 0, max: 3, good: 'down', zero: true, d: 1 },
+    alcohol: { label: 'Alcohol', src: 'scores', col: 'Alcohol', min: 0, max: 10, good: 'down', zero: true, d: 1 },
+    wHappy: { label: 'Happyness werk', short: 'Happy', src: 'work', col: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
+    wStress: { label: 'Werkstress', short: 'Stress', src: 'work', col: 'Stress', min: 1, max: 10, good: 'down', d: 1 },
+    unclenched: { label: 'Unclenched', src: 'work', col: 'Unclenched', min: 1, max: 10, good: 'up', d: 1 },
+    workload: { label: 'Workload', src: 'work', col: 'Workload', min: 1, max: 10, good: null, d: 1 },
+    hrv: { label: 'HRV', unit: 'ms', src: 'body', good: 'up', d: 0 },
+    rhr: { label: 'Rusthartslag', unit: 'bpm', src: 'body', good: 'down', d: 0 },
+    load: { label: 'Belasting', src: 'icu', good: null, d: 0, sum: true },
+    hours: { label: 'Trainingsuren', unit: 'u', src: 'icu', good: null, d: 1, sum: true },
+    ctl: { label: 'Fitness', src: 'icu', good: 'up', d: 0 },
+    atl: { label: 'Vermoeidheid', src: 'icu', good: null, d: 0 },
+    form: { label: 'Vorm', src: 'icu', good: null, d: 0 },
+  };
+  const fmtMetric = (key, v) => {
+    const m = M[key];
+    if (key === 'hours') return fmtHours(v);
+    return fmt(v, m.d) + (m.unit && v != null ? ' ' + m.unit : '');
+  };
+
+  // ================= Toestand =================
+  let RAW = store.get(K.cache) || {};
+  let DATA = new Map();
+  let BOUNDS = null;
+  let ROLL = new Map();
+  let RANGE = { preset: store.get(K.range, '30D'), start: null, end: null, zoomFrom: null };
+  let SMOOTH = store.get(K.smooth, true);
+  let SELECTED = null;
+  let HOVER = null;
+  let BUSY = false;
+  const CHARTS = [];
+  const PRESETS = [['7D', 7], ['30D', 30], ['90D', 90], ['6M', 182], ['1J', 365], ['Alles', null]];
+
+  // ================= Model opbouwen =================
+  function rec(d) { let r = DATA.get(d); if (!r) { r = { date: d, acts: [] }; DATA.set(d, r); } return r; }
+  function buildModel() {
+    DATA = new Map(); ROLL = new Map();
+    const validDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+    for (const src of ['scores', 'work']) {
+      const raw = RAW[src];
+      if (!raw || !raw.text) continue;
+      const t = parseDelimited(raw.text);
+      const di = t.header.indexOf('Datum');
+      const ci = t.header.indexOf('Comment');
+      for (const row of t.rows) {
+        const d = (row[di] || '').trim();
+        if (!validDate(d)) continue;
+        const r = rec(d);
+        for (const [key, m] of Object.entries(M)) {
+          if (m.src !== src) continue;
+          const i = t.header.indexOf(m.col);
+          if (i < 0) continue;
+          const v = num(row[i]);
+          if (v == null || (v === 0 && !m.zero) || v < m.min || v > m.max) continue;
+          r[key] = v;
+        }
+        const c = ci >= 0 ? (row[ci] || '').trim() : '';
+        if (c) r[src === 'scores' ? 'note' : 'workNote'] = c;
+      }
+    }
+    // HRV4Training
+    if (RAW.hrv && RAW.hrv.text) {
+      const t = parseDelimited(RAW.hrv.text);
+      const di = findCol(t.header, [/^date$/i, /^datum$/i, /date/i, /^day$/i]);
+      const ri = findCol(t.header, [/^rmssd$/i, /rmssd/i], /ln/i);
+      const hi = findCol(t.header, [/^hr$/i, /^rhr$/i, /resting.?hr/i, /^heart.?rate$/i, /^hr[ _(]/i]);
+      if (di >= 0) {
+        const parse = dateParser(t.rows.slice(0, 400).map((r) => r[di]));
+        for (const row of t.rows) {
+          const d = parse(row[di]);
+          if (!d) continue;
+          const r = rec(d);
+          const hv = ri >= 0 ? num(row[ri]) : null;
+          const hr = hi >= 0 ? num(row[hi]) : null;
+          if (hv != null && hv > 0 && hv < 400) r.hrv = hv;
+          if (hr != null && hr > 20 && hr < 200) r.rhr = hr;
+        }
+      }
+      RAW.hrv.cols = { date: t.header[di], rmssd: t.header[ri], hr: t.header[hi] };
+    }
+    // intervals.icu
+    if (RAW.icu) {
+      for (const w of RAW.icu.wellness || []) {
+        if (!validDate(w.d)) continue;
+        const r = rec(w.d);
+        if (w.ctl != null) r.ctl = w.ctl;
+        if (w.atl != null) r.atl = w.atl;
+        if (w.ctl != null && w.atl != null) r.form = w.ctl - w.atl;
+        if (r.hrv == null && w.hrv != null) { r.hrv = w.hrv; r.hrvIcu = true; }
+        if (r.rhr == null && w.rhr != null) r.rhr = w.rhr;
+      }
+      for (const a of RAW.icu.activities || []) {
+        if (!validDate(a.d)) continue;
+        const r = rec(a.d);
+        r.acts.push(a);
+        r.hours = (r.hours || 0) + (a.sec || 0) / 3600;
+        r.load = (r.load || 0) + (a.load || 0);
+      }
+      // dagen zonder training binnen de opgehaalde periode tellen als 0
+      if (RAW.icu.from && RAW.icu.to) {
+        for (const d of eachDay(RAW.icu.from, RAW.icu.to)) {
+          const r = DATA.get(d) || (d <= todayISO() ? rec(d) : null);
+          if (!r) continue;
+          if (r.hours == null) r.hours = 0;
+          if (r.load == null) r.load = 0;
+        }
+      }
+    }
+    // grenzen: eerste en laatste dag met echte gegevens
+    const has = (r) => Object.keys(M).some((k) => r[k] != null && !(M[k].sum && r[k] === 0)) || r.note || r.workNote;
+    const days = [...DATA.values()].filter(has).map((r) => r.date).sort();
+    BOUNDS = days.length ? { first: days[0], last: days[days.length - 1] < todayISO() ? days[days.length - 1] : todayISO() } : null;
+  }
+
+  const val = (key, d) => { const r = DATA.get(d); return r ? r[key] ?? null : null; };
+  // 7-daags lopend gemiddelde over beschikbare dagen (minstens 3)
+  function rolling(key, d) {
+    let m = ROLL.get(key);
+    if (!m) { m = new Map(); ROLL.set(key, m); }
+    if (m.has(d)) return m.get(d);
+    const vs = [];
+    for (let i = 0; i < 7; i++) { const v = val(key, addDays(d, -i)); if (v != null) vs.push(v); }
+    const out = vs.length >= 3 || (vs.length >= 1 && val(key, d) != null && vs.length >= 2) ? mean(vs) : null;
+    m.set(d, out);
+    return out;
+  }
+  // Persoonlijke normale bandbreedte: 28 dagen ervoor, gemiddelde ± 1 standaardafwijking
+  function baseline(key, d) {
+    const vs = [];
+    for (let i = 1; i <= 28; i++) { const v = val(key, addDays(d, -i)); if (v != null) vs.push(v); }
+    if (vs.length < 10) return null;
+    const mu = mean(vs);
+    const sd = Math.sqrt(mean(vs.map((v) => (v - mu) ** 2)));
+    return { lo: mu - sd, hi: mu + sd, mu };
+  }
+
+  // ================= Periode =================
+  function lastDay() { return BOUNDS ? BOUNDS.last : todayISO(); }
+  function setPreset(p, keepEnd) {
+    const end = keepEnd && RANGE.end ? RANGE.end : lastDay();
+    const n = (PRESETS.find((x) => x[0] === p) || [0, 30])[1];
+    RANGE = { preset: p, end, start: n ? addDays(end, -(n - 1)) : (BOUNDS ? BOUNDS.first : addDays(end, -29)), zoomFrom: null };
+    if (!n) RANGE.end = lastDay();
+    if (RANGE.start > RANGE.end) RANGE.start = RANGE.end;
+    store.set(K.range, p);
+    renderAll();
+  }
+  function stepRange(dir) {
+    const span = dayDiff(RANGE.start, RANGE.end) + 1;
+    let end = addDays(RANGE.end, dir * span);
+    if (end > lastDay()) end = lastDay();
+    RANGE = { ...RANGE, end, start: addDays(end, -(span - 1)) };
+    renderAll();
+  }
+  function zoomTo(a, b) {
+    if (dayDiff(a, b) < 2) b = addDays(a, 2);
+    RANGE = { preset: 'zoom', start: a, end: b, zoomFrom: RANGE.zoomFrom || { ...RANGE } };
+    renderAll();
+  }
+  function resetZoom() {
+    const from = RANGE.zoomFrom;
+    RANGE = from ? { ...from, zoomFrom: null } : RANGE;
+    if (!from) setPreset('30D');
+    renderAll();
+  }
+  // Periode klaarzetten als die nog niet bestaat (bij de start, of na nieuwe gegevens)
+  function ensureRange() {
+    if (RANGE.start && RANGE.end) return;
+    const p = RANGE.preset === 'zoom' ? '30D' : RANGE.preset;
+    const n = (PRESETS.find((x) => x[0] === p) || [0, 30])[1];
+    const end = lastDay();
+    RANGE = { preset: p, end, start: n ? addDays(end, -(n - 1)) : (BOUNDS ? BOUNDS.first : addDays(end, -29)), zoomFrom: null };
+  }
+  const rangeDays = () => { ensureRange(); return eachDay(RANGE.start, RANGE.end); };
+  function rangeText() {
+    const a = dateOf(RANGE.start), b = dateOf(RANGE.end);
+    const sameYear = a.getFullYear() === b.getFullYear();
+    const thisYear = b.getFullYear() === new Date().getFullYear();
+    const fa = fmtDate(RANGE.start, sameYear ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: '2-digit' });
+    const fb = fmtDate(RANGE.end, thisYear && sameYear ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: '2-digit' });
+    return `${fa} – ${fb}`;
+  }
+
+  // ================= Schaal en assen =================
+  function niceTicks(lo, hi, count = 4) {
+    if (lo === hi) { hi = lo + 1; lo = lo - 1; }
+    const span = hi - lo;
+    const raw = span / count;
+    const mag = 10 ** Math.floor(Math.log10(raw));
+    const step = [1, 2, 2.5, 5, 10].map((s) => s * mag).find((s) => span / s <= count + 0.5) || mag * 10;
+    const t0 = Math.floor(lo / step) * step, t1 = Math.ceil(hi / step) * step;
+    const out = [];
+    for (let t = t0; t <= t1 + step / 2; t += step) out.push(+t.toFixed(6));
+    return out;
+  }
+  function timeTicks(days, width) {
+    const n = days.length;
+    const maxLabels = Math.max(2, Math.floor(width / 58));
+    const out = [];
+    if (n <= 1) return days.map((d, i) => ({ i, d, label: fmtDate(d, { day: 'numeric', month: 'short' }) }));
+    for (const step of [1, 2, 7, 14]) {
+      if (n / step <= maxLabels) {
+        const fmtD = step === 1 && n <= 8 ? { weekday: 'short', day: 'numeric' } : { day: 'numeric', month: 'short' };
+        const startIdx = step >= 7 ? days.findIndex((d) => dateOf(d).getDay() === 1) : 0;
+        for (let i = Math.max(0, startIdx); i < n; i += step) out.push({ i, d: days[i], label: fmtDate(days[i], fmtD) });
+        return out;
+      }
+    }
+    const months = [];
+    days.forEach((d, i) => { if (d.endsWith('-01')) months.push(i); });
+    const every = Math.max(1, Math.ceil(months.length / maxLabels));
+    months.forEach((i, k) => {
+      if (k % every) return;
+      const dt = dateOf(days[i]);
+      out.push({ i, d: days[i], label: dt.getMonth() === 0 ? `jan '${String(dt.getFullYear()).slice(2)}` : fmtDate(days[i], { month: 'short' }) });
+    });
+    return out;
+  }
+  // afgeronde staafjes: datakant 4px rond, basiskant recht
+  function barPath(x0, x1, yBase, yVal) {
+    const h = Math.abs(yBase - yVal);
+    const r = Math.min(4, (x1 - x0) / 2, h);
+    if (h < 0.5) return '';
+    if (yVal < yBase) {
+      return `M${x0},${yBase}V${yVal + r}A${r},${r} 0 0 1 ${x0 + r},${yVal}H${x1 - r}A${r},${r} 0 0 1 ${x1},${yVal + r}V${yBase}Z`;
+    }
+    return `M${x0},${yBase}V${yVal - r}A${r},${r} 0 0 0 ${x0 + r},${yVal}H${x1 - r}A${r},${r} 0 0 0 ${x1},${yVal - r}V${yBase}Z`;
+  }
+
+  // ================= Tijdgrafiek =================
+  class TimeChart {
+    constructor(hostId, spec) {
+      this.spec = spec;
+      const host = document.getElementById(hostId);
+      host.classList.add('card');
+      this.host = host;
+      const hiddenAll = store.get(K.hidden, {});
+      this.hidden = new Set(hiddenAll[spec.id] || []);
+      const head = E('div', 'card-head', null, host);
+      const titles = E('div', 'card-titles', null, head);
+      E('h3', null, spec.title, titles);
+      this.sub = E('p', 'card-sub', spec.sub || '', titles);
+      const actions = E('div', 'card-actions', null, head);
+      this.tableBtn = E('button', 'chip-btn', 'Tabel', actions);
+      this.tableBtn.type = 'button';
+      this.tableBtn.setAttribute('aria-pressed', 'false');
+      this.tableBtn.addEventListener('click', () => {
+        this.showTable = !this.showTable;
+        this.tableBtn.setAttribute('aria-pressed', String(this.showTable));
+        this.render();
+      });
+      if (spec.series.length > 1) {
+        this.legend = E('div', 'legend', null, host);
+        for (const s of spec.series) {
+          const b = E('button', null, null, this.legend);
+          b.type = 'button';
+          const key = E('i', spec.kind === 'bar' || spec.kind === 'strip' ? 'box' : '', null, b);
+          key.style.background = spec.kind === 'strip' ? `var(${s.ramp[s.ramp.length - 1]})` : `var(${s.color})`;
+          E('span', null, s.label, b);
+          b.setAttribute('aria-pressed', String(!this.hidden.has(s.key)));
+          b.addEventListener('click', () => {
+            if (this.hidden.has(s.key)) this.hidden.delete(s.key); else this.hidden.add(s.key);
+            if (this.hidden.size >= spec.series.length) this.hidden.delete(s.key);
+            b.setAttribute('aria-pressed', String(!this.hidden.has(s.key)));
+            const all = store.get(K.hidden, {}); all[spec.id] = [...this.hidden]; store.set(K.hidden, all);
+            this.render();
+          });
+        }
+      }
+      this.plot = E('div', 'plot', null, host);
+      this.plot.tabIndex = 0;
+      this.plot.setAttribute('role', 'img');
+      this.plot.setAttribute('aria-label', spec.title + '. Gebruik de pijltjestoetsen om dagen te bekijken.');
+      this.extra = E('div', null, null, host);
+      this.tableBox = E('div', 'table-box', null, host);
+      this.tableBox.hidden = true;
+      this.tip = E('div', 'tip', null, this.plot);
+      this.tip.hidden = true;
+      this.bindPointer();
+      let raf = 0;
+      new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => this.render()); }).observe(this.plot);
+      CHARTS.push(this);
+    }
+    visibleSeries() { return this.spec.series.filter((s) => !this.hidden.has(s.key)); }
+    buckets() {
+      const days = rangeDays();
+      const agg = this.spec.agg === 'week' || (this.spec.agg === 'auto' && days.length > 120) ? 'week' : 'day';
+      if (agg === 'day') return days.map((d) => ({ start: d, end: d, label: d }));
+      const out = [];
+      for (let w = weekStartOf(RANGE.start); w <= RANGE.end; w = addDays(w, 7)) {
+        out.push({ start: w < RANGE.start ? RANGE.start : w, end: addDays(w, 6) > RANGE.end ? RANGE.end : addDays(w, 6), week: true, wk: w });
+      }
+      return out;
+    }
+    value(s, b, raw) {
+      if (!b.week) {
+        if (!raw && SMOOTH && this.spec.smooth) return rolling(s.key, b.start);
+        return val(s.key, b.start);
+      }
+      let sum = 0, n = 0;
+      for (const d of eachDay(b.start, b.end)) { const v = val(s.key, d); if (v != null) { sum += v; n++; } }
+      if (!n) return null;
+      return M[s.key].sum ? sum : sum / n;
+    }
+    render() {
+      const W = this.plot.clientWidth;
+      if (!W) return;
+      const spec = this.spec;
+      const H = typeof spec.height === 'function' ? spec.height() : spec.height;
+      this.plot.style.height = H + 'px';
+      const bs = this.buckets();
+      const series = this.visibleSeries();
+      const vals = series.map((s) => bs.map((b) => this.value(s, b)));
+      const rawVals = series.map((s) => bs.map((b) => this.value(s, b, true)));
+      const any = vals.some((a) => a.some((v) => v != null));
+      if (this.sub && spec.subFn) this.sub.textContent = spec.subFn(bs);
+      // y-domein
+      let y0, y1, ticks;
+      if (spec.kind === 'strip') { y0 = 0; y1 = 1; ticks = []; }
+      else if (spec.y) { [y0, y1] = spec.y; ticks = spec.yTicks || niceTicks(y0, y1, 4); }
+      else {
+        const all = [];
+        vals.forEach((a) => a.forEach((v) => v != null && all.push(v)));
+        rawVals.forEach((a) => a.forEach((v) => v != null && all.push(v)));
+        if (spec.band) bs.forEach((b) => { const bl = baseline(spec.band, b.start); if (bl) all.push(bl.lo, bl.hi); });
+        let lo = all.length ? Math.min(...all) : 0, hi = all.length ? Math.max(...all) : 1;
+        if (spec.kind === 'bar') lo = Math.min(0, lo);
+        if (spec.kind === 'div') { const m = Math.max(Math.abs(lo), Math.abs(hi), 5); lo = -m; hi = m; }
+        if (spec.kind === 'line' && !spec.zero) { const pad0 = (hi - lo) * 0.12 || 2; lo -= pad0; hi += pad0; }
+        ticks = niceTicks(lo, hi, H < 170 ? 3 : 4);
+        y0 = ticks[0]; y1 = ticks[ticks.length - 1];
+      }
+      const narrow = W < 520;
+      const labelW = spec.kind === 'strip' ? (narrow ? 58 : 84) : Math.max(...ticks.map((t) => fmt(t, 1).length), 1) * 6.6 + 10;
+      const endLabels = spec.kind === 'line' && !narrow && series.length <= 4;
+      const L = labelW, R = endLabels ? 40 : 8, T = 8, B = 22;
+      const pw = W - L - R, ph = H - T - B;
+      const n = bs.length;
+      const band = pw / Math.max(n, 1);
+      const x = (i) => L + (i + 0.5) * band;
+      const y = (v) => T + ph - ((v - y0) / (y1 - y0 || 1)) * ph;
+      this.layout = { bs, series, vals, rawVals, x, y, L, R, T, B, W, H, band, pw, ph };
+
+      const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true' });
+      // rasterlijnen
+      if (spec.kind !== 'strip') {
+        for (const t of ticks) {
+          const yy = Math.round(y(t)) + 0.5;
+          S('line', { x1: L, x2: W - R, y1: yy, y2: yy, stroke: t === 0 && spec.kind !== 'line' ? 'var(--axis)' : 'var(--grid)', 'stroke-width': 1 }, svg);
+          const tx = S('text', { x: L - 8, y: yy + 3.5, 'text-anchor': 'end', class: 'axis-text' }, svg);
+          tx.textContent = fmt(t, Math.abs(y1 - y0) < 5 ? 1 : 0);
+        }
+      }
+      // x-labels
+      const days = bs.map((b) => b.start);
+      const tks = bs.length && bs[0].week
+        ? timeTicks(days, pw).map((t) => t)
+        : timeTicks(days, pw);
+      for (const t of tks) {
+        const tx = S('text', { x: x(t.i), y: H - 6, 'text-anchor': 'middle', class: 'axis-text' }, svg);
+        tx.textContent = t.label;
+      }
+      const gPlot = S('g', null, svg);
+      if (spec.kind === 'line') this.drawLines(gPlot, endLabels);
+      else if (spec.kind === 'bar') this.drawBars(gPlot, n <= 16 && band > 26);
+      else if (spec.kind === 'div') this.drawDiv(gPlot);
+      else if (spec.kind === 'strip') this.drawStrip(gPlot, narrow);
+      // kruisdraad-laag
+      this.gCross = S('g', { class: 'cross' }, svg);
+      this.gBrush = S('g', null, svg);
+      this.plot.querySelectorAll('svg, .empty-msg').forEach((e) => e.remove());
+      this.plot.insertBefore(svg, this.tip);
+      this.plot.classList.toggle('stale', BUSY);
+      if (!any) {
+        const m = E('div', 'empty-msg', spec.empty || 'Geen gegevens in deze periode', null);
+        this.plot.insertBefore(m, this.tip);
+      }
+      if (spec.extra) spec.extra(this.extra, bs);
+      this.renderTable();
+      if (HOVER) this.showAt(HOVER, false);
+    }
+    drawLines(g, endLabels) {
+      const { bs, series, vals, rawVals, x, y, spec = this.spec, band } = this.layout;
+      const smooth = SMOOTH && spec.smooth;
+      // bandbreedte (HRV)
+      if (spec.band) {
+        let top = [], bot = [];
+        const flush = () => {
+          if (top.length > 1) S('path', { d: 'M' + top.join('L') + 'L' + bot.reverse().join('L') + 'Z', fill: 'var(--band)' }, g);
+          top = []; bot = [];
+        };
+        bs.forEach((b, i) => {
+          const bl = baseline(spec.band, b.start);
+          if (!bl) { flush(); return; }
+          top.push(`${x(i)},${y(bl.hi)}`); bot.push(`${x(i)},${y(bl.lo)}`);
+        });
+        flush();
+      }
+      const ends = [];
+      series.forEach((s, si) => {
+        const color = `var(${s.color})`;
+        // losse dagwaarden als vage stippen onder het gemiddelde
+        if (smooth && bs.length <= 200) {
+          rawVals[si].forEach((v, i) => { if (v != null) S('circle', { cx: x(i), cy: y(v), r: bs.length > 100 ? 2 : 2.6, fill: color, 'fill-opacity': 'var(--raw-dot)', opacity: 0.32 }, g); });
+        }
+        const arr = vals[si];
+        const maxGap = smooth ? 1 : 3;
+        let seg = [], gap = 0;
+        const flush = () => { if (seg.length > 1) S('path', { d: 'M' + seg.join('L'), fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, g); else if (seg.length === 1 && !smooth) { const [cx, cy] = seg[0].split(','); S('circle', { cx, cy, r: 2.5, fill: color }, g); } seg = []; };
+        arr.forEach((v, i) => {
+          if (v == null) { gap++; if (gap > maxGap) flush(); return; }
+          gap = 0;
+          seg.push(`${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+        });
+        flush();
+        // eindpunt
+        for (let i = arr.length - 1; i >= 0; i--) {
+          if (arr[i] != null) {
+            S('circle', { cx: x(i), cy: y(arr[i]), r: 4, fill: color, stroke: 'var(--card)', 'stroke-width': 2 }, g);
+            ends.push({ x: x(i), y: y(arr[i]), v: arr[i], key: s.key, last: i === arr.length - 1 });
+            break;
+          }
+        }
+      });
+      if (endLabels && ends.length) {
+        const ys = ends.map((e) => e.y).sort((a, b) => a - b);
+        const clash = ys.some((v, i) => i && v - ys[i - 1] < 13);
+        if (!clash) for (const e of ends) {
+          const t = S('text', { x: Math.max(e.x, this.layout.W - this.layout.R) + 8, y: e.y + 4, class: 'end-label' }, g);
+          t.textContent = fmt(e.v, M[e.key].d);
+        }
+      }
+    }
+    drawBars(g, capLabels) {
+      const { bs, series, vals, x, y, band } = this.layout;
+      const s = series[0], arr = vals[0];
+      const w = Math.max(1.5, Math.min(24, band - 2, band * 0.66));
+      arr.forEach((v, i) => {
+        if (v == null || v === 0) return;
+        const d = barPath(x(i) - w / 2, x(i) + w / 2, y(0), y(v));
+        if (d) S('path', { d, fill: `var(${s.color})` }, g);
+        if (capLabels) {
+          const t = S('text', { x: x(i), y: y(v) - 5, 'text-anchor': 'middle', class: 'cap-label' }, g);
+          t.textContent = s.key === 'hours' ? fmt(v, 1) : fmt(v, 0);
+        }
+      });
+    }
+    drawDiv(g) {
+      const { vals, x, y, band } = this.layout;
+      const w = Math.max(1.5, Math.min(24, band - 2, band * 0.66));
+      vals[0].forEach((v, i) => {
+        if (v == null) return;
+        const d = barPath(x(i) - w / 2, x(i) + w / 2, y(0), y(v));
+        if (d) S('path', { d, fill: v >= 0 ? 'var(--pos)' : 'var(--neg)' }, g);
+      });
+    }
+    drawStrip(g, narrow) {
+      const { bs, series, T, L, band, x } = this.layout;
+      const rowH = 22, gapY = 8;
+      series.forEach((s, si) => {
+        const yTop = T + si * (rowH + gapY);
+        const lab = S('text', { x: 0, y: yTop + rowH / 2 + 4, class: 'axis-text' }, g);
+        lab.textContent = s.label;
+        const w = Math.max(1, band - (band > 6 ? 2 : 0.5));
+        bs.forEach((b, i) => {
+          const v = val(s.key, b.start);
+          const xx = x(i) - w / 2;
+          if (v == null) {
+            S('rect', { x: xx, y: yTop + rowH / 2 - 1, width: w, height: 2, rx: 1, fill: 'var(--grid)' }, g);
+            return;
+          }
+          const step = s.level(v);
+          S('rect', { x: xx, y: yTop, width: w, height: rowH, rx: Math.min(4, w / 2), fill: step < 0 ? 'var(--card-2)' : `var(${s.ramp[step]})` }, g);
+        });
+      });
+    }
+    renderTable() {
+      this.tableBox.hidden = !this.showTable;
+      this.plot.hidden = !!this.showTable;
+      if (!this.showTable) return;
+      const { bs, series } = this.layout;
+      this.tableBox.textContent = '';
+      const tb = E('table', null, null, this.tableBox);
+      const hr = E('tr', null, null, E('thead', null, null, tb));
+      E('th', null, bs[0] && bs[0].week ? 'Week' : 'Dag', hr);
+      for (const s of series) E('th', null, s.label, hr);
+      const body = E('tbody', null, null, tb);
+      for (let i = bs.length - 1; i >= 0; i--) {
+        const b = bs[i];
+        const vs = series.map((s) => this.value(s, b, !b.week));
+        if (vs.every((v) => v == null)) continue;
+        const tr = E('tr', null, null, body);
+        E('td', null, b.week ? `wk ${isoWeek(b.start)} · ${fmtDate(b.start, { day: 'numeric', month: 'short' })}` : fmtDate(b.start, { weekday: 'short', day: 'numeric', month: 'short' }), tr);
+        vs.forEach((v, k) => E('td', null, fmtMetric(series[k].key, v), tr));
+      }
+    }
+    indexAt(e) {
+      const r = this.plot.getBoundingClientRect();
+      const { L, band, bs } = this.layout;
+      return Math.max(0, Math.min(bs.length - 1, Math.floor((e.clientX - r.left - L) / band)));
+    }
+    showAt(date, withTip = true) {
+      if (!this.layout || this.showTable || !this.host.offsetParent) return;
+      const { bs, series, vals, rawVals, x, y, T, H, B, W } = this.layout;
+      const i = bs.findIndex((b) => date >= b.start && date <= b.end);
+      this.gCross.textContent = '';
+      if (i < 0 || !date) { this.tip.hidden = true; return; }
+      const xx = Math.round(x(i)) + 0.5;
+      S('line', { x1: xx, x2: xx, y1: T, y2: H - B, stroke: 'var(--muted)', 'stroke-width': 1, 'stroke-opacity': 0.6 }, this.gCross);
+      if (this.spec.kind === 'line') {
+        series.forEach((s, si) => { const v = vals[si][i]; if (v != null) S('circle', { cx: x(i), cy: y(v), r: 4.5, fill: `var(${s.color})`, stroke: 'var(--card)', 'stroke-width': 2 }, this.gCross); });
+      }
+      if (!withTip) { this.tip.hidden = true; return; }
+      // tooltip
+      const b = bs[i];
+      const tip = this.tip;
+      tip.textContent = '';
+      E('div', 'tip-date', b.week ? `Week ${isoWeek(b.start)} · ${fmtDate(b.start, { day: 'numeric', month: 'short' })} – ${fmtDate(b.end, { day: 'numeric', month: 'short' })}` : fmtDate(b.start, { weekday: 'long', day: 'numeric', month: 'long' }), tip);
+      series.forEach((s, si) => {
+        const v = this.spec.kind === 'strip' ? val(s.key, b.start) : vals[si][i];
+        const row = E('div', 'tip-row', null, tip);
+        const key = E('i', this.spec.kind === 'bar' || this.spec.kind === 'strip' || this.spec.kind === 'div' ? 'box' : '', null, row);
+        key.style.background = this.spec.kind === 'strip' ? `var(${s.ramp[s.ramp.length - 1]})` : this.spec.kind === 'div' ? (v >= 0 ? 'var(--pos)' : 'var(--neg)') : `var(${s.color})`;
+        E('b', null, fmtMetric(s.key, v), row);
+        let label = s.label;
+        if (this.spec.kind === 'line' && SMOOTH && this.spec.smooth) {
+          const rv = rawVals[si][i];
+          label += rv != null ? ` · dag ${fmt(rv, M[s.key].d)}` : ' · gem.';
+        }
+        E('span', null, label, row);
+      });
+      if (this.spec.band) {
+        const bl = baseline(this.spec.band, b.start);
+        if (bl) E('div', 'tip-date', `Normaal voor jou: ${fmt(bl.lo, 0)}–${fmt(bl.hi, 0)} ${M[this.spec.band].unit || ''}`, tip).style.margin = '5px 0 0';
+      }
+      tip.hidden = false;
+      const tw = tip.offsetWidth;
+      let left = x(i) + 14;
+      if (left + tw > W) left = x(i) - tw - 14;
+      tip.style.left = Math.max(0, left) + 'px';
+      tip.style.top = '0px';
+    }
+    hideCross() { if (this.gCross) this.gCross.textContent = ''; this.tip.hidden = true; }
+    drawBrush(a, b) {
+      const { x, band, T, H, B } = this.layout;
+      this.gBrush.textContent = '';
+      const x0 = x(Math.min(a, b)) - band / 2, x1 = x(Math.max(a, b)) + band / 2;
+      S('rect', { x: x0, y: T, width: x1 - x0, height: H - B - T, fill: 'var(--accent)', 'fill-opacity': 0.12, rx: 6 }, this.gBrush);
+    }
+    bindPointer() {
+      const p = this.plot;
+      let down = null;
+      p.addEventListener('pointerdown', (e) => {
+        if (!this.layout || this.showTable) return;
+        down = { x: e.clientX, y: e.clientY, i0: this.indexAt(e), type: e.pointerType, moved: false };
+        if (e.pointerType !== 'mouse') { this.showAt(this.layout.bs[down.i0].start); }
+      });
+      p.addEventListener('pointermove', (e) => {
+        if (!this.layout || this.showTable) return;
+        const i = this.indexAt(e);
+        const d = this.layout.bs[i].start;
+        if (down && Math.abs(e.clientX - down.x) > 6) down.moved = true;
+        if (down && down.type === 'mouse' && e.buttons === 1 && down.moved && this.spec.zoom !== false) {
+          this.dragging = true;
+          this.drawBrush(down.i0, i);
+        }
+        if (e.pointerType === 'mouse') syncHover(d);
+        else if (down) this.showAt(d);
+      });
+      const end = (e) => {
+        if (!down) return;
+        const i = this.indexAt(e);
+        if (this.dragging) {
+          this.dragging = false;
+          this.gBrush.textContent = '';
+          const a = Math.min(down.i0, i), b = Math.max(down.i0, i);
+          const bs = this.layout.bs;
+          if (b > a) zoomTo(bs[a].start, bs[b].end);
+        } else if (!down.moved || down.type !== 'mouse') {
+          const b = this.layout.bs[down.moved ? i : down.i0];
+          if (b && (!down.moved)) selectDay(b.week ? b.end : b.start, { open: !isWide() });
+        }
+        if (down.type !== 'mouse') setTimeout(() => this.hideCross(), down.moved ? 1600 : 300);
+        down = null;
+      };
+      p.addEventListener('pointerup', end);
+      p.addEventListener('pointercancel', () => { down = null; this.dragging = false; if (this.gBrush) this.gBrush.textContent = ''; this.hideCross(); });
+      p.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && !this.dragging) syncHover(null); });
+      p.addEventListener('keydown', (e) => {
+        if (!this.layout) return;
+        const bs = this.layout.bs;
+        let i = this.kbIndex == null ? bs.length - 1 : this.kbIndex;
+        if (e.key === 'ArrowLeft') i = Math.max(0, i - 1);
+        else if (e.key === 'ArrowRight') i = Math.min(bs.length - 1, i + 1);
+        else if (e.key === 'Enter') { selectDay(bs[i].week ? bs[i].end : bs[i].start, { open: !isWide() }); return; }
+        else return;
+        e.preventDefault();
+        this.kbIndex = i;
+        this.showAt(bs[i].start);
+      });
+      p.addEventListener('blur', () => { this.kbIndex = null; this.hideCross(); });
+    }
+  }
+
+  function syncHover(d) {
+    HOVER = d;
+    for (const c of CHARTS) {
+      if (!(c instanceof TimeChart) || !c.host.offsetParent) continue;
+      if (d) c.showAt(d); else c.hideCross();
+    }
+    if (isWide()) renderDayPanel(d || SELECTED);
+  }
+
+  // ================= Spreidingsdiagram (verkenner) =================
+  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'alcohol', 'ziek', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
+  function pairs(xk, yk, lag, days) {
+    const out = [];
+    for (const d of days) {
+      const xv = val(xk, d), yv = val(yk, addDays(d, lag));
+      if (xv != null && yv != null) out.push({ d, x: xv, y: yv });
+    }
+    return out;
+  }
+  function pearson(ps) {
+    const n = ps.length;
+    if (n < 3) return null;
+    const mx = mean(ps.map((p) => p.x)), my = mean(ps.map((p) => p.y));
+    let sxy = 0, sxx = 0, syy = 0;
+    for (const p of ps) { sxy += (p.x - mx) * (p.y - my); sxx += (p.x - mx) ** 2; syy += (p.y - my) ** 2; }
+    if (!sxx || !syy) return null;
+    return { r: sxy / Math.sqrt(sxx * syy), slope: sxy / sxx, mx, my, n };
+  }
+  const strength = (r) => { const a = Math.abs(r); return a < 0.2 ? 'nauwelijks' : a < 0.4 ? 'zwak' : a < 0.6 ? 'matig' : 'sterk'; };
+
+  class ScatterChart {
+    constructor(hostId) {
+      const host = document.getElementById(hostId);
+      host.classList.add('card');
+      this.host = host;
+      const st = store.get(K.scatter, { x: 'alcohol', y: 'hrv', lag: 1 });
+      this.st = st;
+      const head = E('div', 'card-head', null, host);
+      const t = E('div', 'card-titles', null, head);
+      E('h3', null, 'Verkenner', t);
+      E('p', 'card-sub', 'Zet twee meetwaarden tegen elkaar', t);
+      const ctr = E('div', 'explorer-controls', null, host);
+      const mk = (label, opts, value, onChange) => {
+        const l = E('label', null, label, ctr);
+        const s = E('select', null, null, l);
+        for (const [v, txt] of opts) { const o = E('option', null, txt, s); o.value = v; }
+        s.value = String(value);
+        s.addEventListener('change', () => { onChange(s.value); store.set(K.scatter, this.st); this.render(); });
+        return s;
+      };
+      const opts = EXPLORE.map((k) => [k, M[k].label]);
+      mk('X', opts, st.x, (v) => { st.x = v; });
+      mk('Y', opts, st.y, (v) => { st.y = v; });
+      mk('', [['0', 'zelfde dag'], ['1', 'Y de dag erna']], st.lag, (v) => { st.lag = +v; });
+      this.plot = E('div', 'plot', null, host);
+      this.plot.style.height = '260px';
+      this.stat = E('p', 'stat-line', null, host);
+      this.tip = E('div', 'tip', null, this.plot);
+      this.tip.hidden = true;
+      this.plot.addEventListener('pointermove', (e) => this.hover(e));
+      this.plot.addEventListener('pointerdown', (e) => this.hover(e));
+      this.plot.addEventListener('pointerleave', () => { this.tip.hidden = true; if (this.ring) this.ring.textContent = ''; });
+      this.plot.addEventListener('click', (e) => { const p = this.nearest(e); if (p) selectDay(p.d, { open: !isWide() }); });
+      new ResizeObserver(() => this.render()).observe(this.plot);
+      CHARTS.push(this);
+    }
+    render() {
+      const W = this.plot.clientWidth;
+      if (!W) return;
+      const H = 260, { x: xk, y: yk, lag } = this.st;
+      const ps = pairs(xk, yk, lag, rangeDays());
+      const intScale = (k) => M[k].src === 'scores' || M[k].src === 'work';
+      const ext = (k, arr) => {
+        if (M[k].max != null) return [M[k].min, M[k].max];
+        const lo = Math.min(...arr), hi = Math.max(...arr);
+        return arr.length ? [lo, hi] : [0, 1];
+      };
+      const [xl, xh] = ext(xk, ps.map((p) => p.x)), [yl, yh] = ext(yk, ps.map((p) => p.y));
+      const xt = niceTicks(xl, xh, 4), yt = niceTicks(yl, yh, 4);
+      const L = Math.max(...yt.map((t) => fmt(t, 1).length)) * 6.6 + 12, R = 10, T = 8, B = 30;
+      const sx = (v) => L + ((v - xt[0]) / (xt[xt.length - 1] - xt[0] || 1)) * (W - L - R);
+      const sy = (v) => T + (H - T - B) - ((v - yt[0]) / (yt[yt.length - 1] - yt[0] || 1)) * (H - T - B);
+      const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true' });
+      for (const t of yt) {
+        const yy = Math.round(sy(t)) + 0.5;
+        S('line', { x1: L, x2: W - R, y1: yy, y2: yy, stroke: 'var(--grid)' }, svg);
+        S('text', { x: L - 8, y: yy + 3.5, 'text-anchor': 'end', class: 'axis-text' }, svg).textContent = fmt(t, 1);
+      }
+      for (const t of xt) S('text', { x: sx(t), y: H - 14, 'text-anchor': 'middle', class: 'axis-text' }, svg).textContent = fmt(t, 1);
+      S('text', { x: W - R, y: H - 1, 'text-anchor': 'end', class: 'axis-text' }, svg).textContent = M[xk].label + ' →';
+      // jitter voor hele getallen, vast per dag zodat niets verspringt
+      const jit = (d, k) => { let h = 0; for (const c of d + k) h = (h * 31 + c.charCodeAt(0)) | 0; return ((h % 1000) / 1000 - 0.5) * 0.36; };
+      this.pts = ps.map((p) => ({ ...p, px: sx(p.x + (intScale(xk) ? jit(p.d, 'x') : 0)), py: sy(p.y + (intScale(yk) ? jit(p.d, 'y') : 0)) }));
+      const c = pearson(ps);
+      if (c) {
+        const xa = xt[0], xb = xt[xt.length - 1];
+        const ya = c.my + c.slope * (xa - c.mx), yb = c.my + c.slope * (xb - c.mx);
+        const clamp = (v) => Math.max(yt[0], Math.min(yt[yt.length - 1], v));
+        S('line', { x1: sx(xa), y1: sy(clamp(ya)), x2: sx(xb), y2: sy(clamp(yb)), stroke: 'var(--ink-2)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-opacity': 0.55 }, svg);
+      }
+      for (const p of this.pts) S('circle', { cx: p.px, cy: p.py, r: 4.5, fill: 'var(--s1)', 'fill-opacity': 0.75, stroke: 'var(--card)', 'stroke-width': 2 }, svg);
+      this.ring = S('g', null, svg);
+      this.plot.querySelectorAll('svg, .empty-msg').forEach((e) => e.remove());
+      this.plot.insertBefore(svg, this.tip);
+      if (!ps.length) this.plot.insertBefore(E('div', 'empty-msg', 'Geen dagen met beide waarden in deze periode'), this.tip);
+      const lagTxt = lag ? ' de dag erna' : '';
+      if (!c || ps.length < 8) this.stat.textContent = ps.length ? `Te weinig dagen (${ps.length}) om iets te zeggen. Kies een langere periode.` : '';
+      else {
+        this.stat.textContent = '';
+        const dir = c.r > 0 ? 'hoger' : 'lager';
+        this.stat.append(`Bij een hogere ${M[xk].label.toLowerCase()} is ${M[yk].label.toLowerCase()}${lagTxt} gemiddeld `, Object.assign(document.createElement('b'), { textContent: dir }), ` — ${strength(c.r)} verband (r = ${fmt(c.r, 2)}, ${c.n} dagen).`);
+      }
+    }
+    nearest(e) {
+      if (!this.pts || !this.pts.length) return null;
+      const r = this.plot.getBoundingClientRect();
+      const mx = e.clientX - r.left, my = e.clientY - r.top;
+      let best = null, bd = 28 * 28;
+      for (const p of this.pts) { const dd = (p.px - mx) ** 2 + (p.py - my) ** 2; if (dd < bd) { bd = dd; best = p; } }
+      return best;
+    }
+    hover(e) {
+      const p = this.nearest(e);
+      this.ring.textContent = '';
+      if (!p) { this.tip.hidden = true; return; }
+      S('circle', { cx: p.px, cy: p.py, r: 7, fill: 'none', stroke: 'var(--s1)', 'stroke-width': 2 }, this.ring);
+      const tip = this.tip;
+      tip.textContent = '';
+      E('div', 'tip-date', fmtDate(p.d, { weekday: 'short', day: 'numeric', month: 'long' }), tip);
+      const r1 = E('div', 'tip-row', null, tip); E('i', null, null, r1).style.background = 'transparent'; E('b', null, fmtMetric(this.st.x, p.x), r1); E('span', null, M[this.st.x].label, r1);
+      const r2 = E('div', 'tip-row', null, tip); E('i', null, null, r2).style.background = 'transparent'; E('b', null, fmtMetric(this.st.y, p.y), r2); E('span', null, M[this.st.y].label + (this.st.lag ? ' (dag erna)' : ''), r2);
+      tip.hidden = false;
+      const W = this.plot.clientWidth;
+      tip.style.left = Math.max(0, Math.min(W - tip.offsetWidth, p.px + 12)) + 'px';
+      tip.style.top = Math.max(0, p.py - 70) + 'px';
+    }
+  }
+
+  // ================= Kalender-heatmap =================
+  const CAL_METRICS = ['happy', 'energie', 'leven', 'prive', 'wStress', 'hrv', 'load', 'hours', 'alcohol'];
+  class CalendarChart {
+    constructor(hostId) {
+      const host = document.getElementById(hostId);
+      host.classList.add('card');
+      this.host = host;
+      this.key = store.get(K.cal, 'happy');
+      const head = E('div', 'card-head', null, host);
+      const t = E('div', 'card-titles', null, head);
+      E('h3', null, 'Kalender', t);
+      this.sub = E('p', 'card-sub', 'Elke dag één vakje', t);
+      const ctr = E('div', 'explorer-controls', null, host);
+      const l = E('label', null, 'Toon', ctr);
+      const s = E('select', null, null, l);
+      for (const k of CAL_METRICS) { const o = E('option', null, M[k].label, s); o.value = k; }
+      s.value = this.key;
+      s.addEventListener('change', () => { this.key = s.value; store.set(K.cal, this.key); this.render(); });
+      this.plot = E('div', 'plot', null, host);
+      this.legendBox = E('div', 'scale-legend', null, host);
+      this.tip = E('div', 'tip', null, this.plot);
+      this.tip.hidden = true;
+      new ResizeObserver(() => this.render()).observe(this.plot);
+      CHARTS.push(this);
+    }
+    render() {
+      const W = this.plot.clientWidth;
+      if (!W) return;
+      ensureRange();
+      const key = this.key, m = M[key];
+      const weeks = [];
+      for (let w = weekStartOf(RANGE.start); w <= RANGE.end; w = addDays(w, 7)) weeks.push(w);
+      const L = 22, T = 18, gap = 3;
+      const cell = Math.max(6, Math.min(36, Math.floor((W - L) / weeks.length) - gap));
+      const H = T + 7 * (cell + gap);
+      this.plot.style.height = H + 'px';
+      const vs = rangeDays().map((d) => val(key, d)).filter((v) => v != null);
+      let lo = m.max != null ? m.min : Math.min(...vs), hi = m.max != null ? m.max : Math.max(...vs);
+      if (!vs.length) { lo = 0; hi = 1; }
+      const steps = ['--q1', '--q2', '--q3', '--q4', '--q5', '--q6', '--q7'];
+      const level = (v) => Math.max(0, Math.min(6, Math.round(((v - lo) / (hi - lo || 1)) * 6)));
+      const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true' });
+      ['ma', 'wo', 'vr'].forEach((d, i) => S('text', { x: 0, y: T + (i * 2) * (cell + gap) + cell / 2 + 4, class: 'axis-text' }, svg).textContent = d);
+      let lastMonth = -1;
+      this.cells = [];
+      weeks.forEach((w, wi) => {
+        const cx = L + wi * (cell + gap);
+        const mo = dateOf(w).getMonth();
+        if (mo !== lastMonth && (cell + gap) * (weeks.length - wi) > 24) {
+          S('text', { x: cx, y: 11, class: 'axis-text' }, svg).textContent = fmtDate(w, { month: 'short' });
+          lastMonth = mo;
+        }
+        for (let k = 0; k < 7; k++) {
+          const d = addDays(w, k);
+          if (d < RANGE.start || d > RANGE.end) continue;
+          const v = val(key, d);
+          const cy = T + k * (cell + gap);
+          const fill = v == null ? 'var(--card-2)' : `var(${steps[level(v)]})`;
+          S('rect', { x: cx, y: cy, width: cell, height: cell, rx: Math.min(4, cell / 3), fill }, svg);
+          if (d === SELECTED) S('rect', { x: cx - 1.5, y: cy - 1.5, width: cell + 3, height: cell + 3, rx: Math.min(5, cell / 3 + 1), fill: 'none', stroke: 'var(--ink)', 'stroke-width': 1.5 }, svg);
+          this.cells.push({ d, v, x: cx, y: cy, s: cell });
+        }
+      });
+      this.plot.querySelectorAll('svg').forEach((e) => e.remove());
+      this.plot.insertBefore(svg, this.tip);
+      this.plot.onpointermove = (e) => this.hover(e);
+      this.plot.onpointerleave = () => { this.tip.hidden = true; };
+      this.plot.onclick = (e) => { const c = this.at(e); if (c) selectDay(c.d, { open: !isWide() }); };
+      // schaal-legenda
+      this.legendBox.textContent = '';
+      E('span', null, m.max != null ? fmt(lo, 0) : fmt(lo, m.d), this.legendBox);
+      for (const st of steps) E('i', null, null, this.legendBox).style.background = `var(${st})`;
+      E('span', null, (m.max != null ? fmt(hi, 0) : fmt(hi, m.d)) + (m.unit ? ' ' + m.unit : ''), this.legendBox);
+      const nofill = E('i', null, null, this.legendBox); nofill.style.cssText = 'background:var(--card-2);margin-left:10px;border:1px solid var(--hair)';
+      E('span', null, 'geen meting', this.legendBox);
+    }
+    at(e) {
+      const r = this.plot.getBoundingClientRect();
+      const mx = e.clientX - r.left, my = e.clientY - r.top;
+      return (this.cells || []).find((c) => mx >= c.x - 1.5 && mx <= c.x + c.s + 1.5 && my >= c.y - 1.5 && my <= c.y + c.s + 1.5) || null;
+    }
+    hover(e) {
+      const c = this.at(e);
+      if (!c) { this.tip.hidden = true; return; }
+      const tip = this.tip;
+      tip.textContent = '';
+      E('div', 'tip-date', fmtDate(c.d, { weekday: 'long', day: 'numeric', month: 'long' }), tip);
+      const row = E('div', 'tip-row', null, tip);
+      E('i', 'box', null, row).style.background = 'transparent';
+      E('b', null, fmtMetric(this.key, c.v), row);
+      E('span', null, M[this.key].label, row);
+      tip.hidden = false;
+      const W = this.plot.clientWidth;
+      tip.style.left = Math.max(0, Math.min(W - tip.offsetWidth, c.x + c.s + 8)) + 'px';
+      tip.style.top = Math.max(0, c.y - 20) + 'px';
+    }
+  }
+
+  // ================= Tegels =================
+  const TILES = [
+    { key: 'happy' }, { key: 'energie' }, { key: 'prive' }, { key: 'wStress' },
+    { key: 'hrv' }, { key: 'rhr' }, { key: 'hours', total: true }, { key: 'load', total: true },
+  ];
+  function periodStat(key, a, b, total) {
+    const vs = eachDay(a, b).map((d) => val(key, d)).filter((v) => v != null);
+    if (!vs.length) return null;
+    return total ? vs.reduce((s, v) => s + v, 0) : mean(vs);
+  }
+  function renderTiles() {
+    const box = $('#tiles');
+    box.textContent = '';
+    const span = dayDiff(RANGE.start, RANGE.end) + 1;
+    const prevEnd = addDays(RANGE.start, -1), prevStart = addDays(prevEnd, -(span - 1));
+    for (const t of TILES) {
+      const m = M[t.key];
+      const cur = periodStat(t.key, RANGE.start, RANGE.end, t.total);
+      const prev = periodStat(t.key, prevStart, prevEnd, t.total);
+      const tile = E('div', 'card tile', null, box);
+      const lab = E('div', 'tile-label', null, tile);
+      E('span', null, m.label, lab);
+      E('em', null, t.total ? 'totaal' : 'gem.', lab);
+      const value = E('div', 'tile-value', null, tile);
+      if (t.key === 'hours') {
+        value.textContent = cur == null ? '–' : fmt(cur, 1);
+        if (cur != null) E('small', null, 'uur', value);
+      } else {
+        value.textContent = cur == null ? '–' : fmt(cur, m.d);
+        if (cur != null && m.unit) E('small', null, m.unit, value);
+      }
+      const delta = E('div', 'tile-delta', null, tile);
+      if (cur != null && prev != null) {
+        const dd = t.total ? (m.d || 0) : Math.max(1, m.d);
+        const dv = Math.round((cur - prev) * 10 ** dd) / 10 ** dd; // verschil zoals het getoond wordt
+        const same = dv === 0;
+        const better = m.good == null || same ? null : (dv > 0) === (m.good === 'up');
+        if (better != null) delta.classList.add(better ? 'good' : 'bad');
+        if (!same) {
+          const ic = S('svg', { viewBox: '0 0 10 10', 'aria-hidden': 'true' }, delta);
+          S('path', { d: dv > 0 ? 'M5 1.5 9 8H1z' : 'M5 8.5 9 2H1z', fill: 'currentColor' }, ic);
+          E('b', null, fmtSigned(dv, dd), delta);
+        }
+        const word = same ? 'gelijk' : better == null ? 'vs' : better ? 'beter' : 'slechter';
+        E('span', 'long', `${word === 'vs' ? 'vs' : word === 'gelijk' ? 'gelijk aan' : word + ' dan'} vorige periode`, delta);
+        E('span', 'short', word === 'vs' ? 'vs vorige' : word, delta);
+        delta.setAttribute('title', `Vorige periode: ${fmtMetric(t.key, prev)}`);
+      } else {
+        E('span', null, cur == null ? 'geen gegevens' : 'geen vorige periode', delta);
+      }
+      // sparkline: dagwaarden (of 7-daags gem.) over de periode
+      const days = rangeDays();
+      const pts = days.map((d) => (SMOOTH && !m.sum ? rolling(t.key, d) : val(t.key, d)));
+      const sv = S('svg', { class: 'spark', viewBox: '0 0 100 34', preserveAspectRatio: 'none', 'aria-hidden': 'true' }, tile);
+      const vs = pts.filter((v) => v != null);
+      if (vs.length > 1) {
+        const lo = Math.min(...vs), hi = Math.max(...vs);
+        const X = (i) => (i / (days.length - 1)) * 100, Y = (v) => 30 - ((v - lo) / (hi - lo || 1)) * 26;
+        if (m.sum) {
+          const w = Math.max(0.6, 100 / days.length - 0.8);
+          pts.forEach((v, i) => { if (v) S('rect', { x: X(i) - w / 2, y: Y(v), width: w, height: 30 - Y(v) + 0.01, fill: 'var(--axis)', 'vector-effect': 'non-scaling-stroke' }, sv); });
+        } else {
+          let d = '';
+          pts.forEach((v, i) => { if (v != null) d += (d ? 'L' : 'M') + X(i).toFixed(2) + ',' + Y(v).toFixed(2); });
+          S('path', { d, fill: 'none', stroke: 'var(--axis)', 'stroke-width': 1.6, 'vector-effect': 'non-scaling-stroke', 'stroke-linejoin': 'round' }, sv);
+          for (let i = pts.length - 1; i >= 0; i--) if (pts[i] != null) { S('circle', { cx: X(i), cy: Y(pts[i]), r: 2.6, fill: 'var(--accent)', 'vector-effect': 'non-scaling-stroke' }, sv); break; }
+        }
+      }
+    }
+    $('#overNote').textContent = `${rangeText()} · vergeleken met de ${span} dagen ervoor`;
+  }
+
+  // ================= Opvallend en notities =================
+  const CANDIDATES = [
+    ['alcohol', 'hrv', 1], ['alcohol', 'happy', 1], ['alcohol', 'energie', 1], ['load', 'hrv', 1], ['load', 'energie', 1],
+    ['hours', 'happy', 0], ['wStress', 'hrv', 1], ['wStress', 'happy', 0], ['prive', 'happy', 0], ['prive', 'hrv', 1],
+    ['workload', 'wStress', 0], ['hrv', 'energie', 0], ['ziek', 'happy', 0], ['unclenched', 'happy', 0], ['rhr', 'energie', 0],
+  ];
+  function renderFindings() {
+    const list = $('#findList');
+    list.textContent = '';
+    const days = rangeDays();
+    const found = [];
+    for (const [xk, yk, lag] of CANDIDATES) {
+      const ps = pairs(xk, yk, lag, days);
+      if (ps.length < 12) continue;
+      const c = pearson(ps);
+      if (c && Math.abs(c.r) >= 0.25) found.push({ xk, yk, lag, ...c, ps });
+    }
+    found.sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
+    if (!found.length) {
+      E('p', 'muted-p', days.length < 30 ? 'Kies een langere periode (90D of meer) om verbanden te zien.' : 'Geen duidelijke verbanden in deze periode.', list);
+      return;
+    }
+    for (const f of found.slice(0, 3)) {
+      const li = E('li', 'finding', null, list);
+      const mini = S('svg', { viewBox: '0 0 44 44', 'aria-hidden': 'true' }, li);
+      S('rect', { x: 0.5, y: 0.5, width: 43, height: 43, rx: 10, fill: 'var(--card-2)' }, mini);
+      const xs = f.ps.map((p) => p.x), ys = f.ps.map((p) => p.y);
+      const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+      for (const p of f.ps.slice(-40)) S('circle', { cx: 8 + ((p.x - x0) / (x1 - x0 || 1)) * 28, cy: 36 - ((p.y - y0) / (y1 - y0 || 1)) * 28, r: 1.6, fill: 'var(--s1)', 'fill-opacity': 0.7 }, mini);
+      const ya = f.my + f.slope * (x0 - f.mx), yb = f.my + f.slope * (x1 - f.mx);
+      S('line', { x1: 8, x2: 36, y1: 36 - ((ya - y0) / (y1 - y0 || 1)) * 28, y2: 36 - ((yb - y0) / (y1 - y0 || 1)) * 28, stroke: 'var(--ink-2)', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, mini);
+      const txt = E('div', null, null, li);
+      const dir = f.r > 0 ? 'hoger' : 'lager';
+      E('p', null, `Meer ${M[f.xk].label.toLowerCase()} → ${M[f.yk].label.toLowerCase()}${f.lag ? ' de dag erna' : ''} ${dir}`, txt);
+      E('small', null, `${strength(f.r)} verband · r = ${fmt(f.r, 2)} · ${f.n} dagen`, txt);
+      li.tabIndex = 0;
+      const open = () => {
+        scatter.st = { x: f.xk, y: f.yk, lag: f.lag };
+        store.set(K.scatter, scatter.st);
+        scatter.host.querySelectorAll('select').forEach((s, i) => { s.value = String([f.xk, f.yk, f.lag][i]); });
+        if (isTouchLayout()) showTab('inzicht');
+        scatter.render();
+        scatter.host.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      };
+      li.addEventListener('click', open);
+      li.addEventListener('keydown', (e) => { if (e.key === 'Enter') open(); });
+    }
+  }
+  function noteItems(days) {
+    const items = [];
+    for (const d of days) {
+      const r = DATA.get(d);
+      if (!r) continue;
+      if (r.note) items.push({ d, tag: 'Dag', text: r.note });
+      if (r.workNote) items.push({ d, tag: 'Werk', text: r.workNote });
+    }
+    return items.sort((a, b) => b.d.localeCompare(a.d));
+  }
+  function renderNoteList(list, items, emptyText) {
+    list.textContent = '';
+    if (!items.length) { E('p', 'muted-p', emptyText, list); return; }
+    for (const it of items) {
+      const li = E('li', null, null, list);
+      li.tabIndex = 0;
+      E('span', 'note-date', fmtDate(it.d, { weekday: 'short', day: 'numeric', month: 'short' }), li);
+      const t = E('span', 'note-text', null, li);
+      E('span', 'note-tag', it.tag, t);
+      t.append(it.text);
+      const go = () => selectDay(it.d, { open: !isWide() });
+      li.addEventListener('click', go);
+      li.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+    }
+  }
+
+  // ================= Dagdetail =================
+  function fillDay(box, d) {
+    box.textContent = '';
+    if (!d) { E('p', 'day-empty', 'Wijs een dag aan in een grafiek.', box); return; }
+    const r = DATA.get(d) || { acts: [] };
+    const head = E('div', 'day-head', null, box);
+    const ht = E('div', null, null, head);
+    E('div', 'day-kicker', d === todayISO() ? 'Vandaag' : d === addDays(todayISO(), -1) ? 'Gisteren' : fmtDate(d, { year: 'numeric' }), ht);
+    E('h3', null, fmtDate(d, { weekday: 'long', day: 'numeric', month: 'long' }), ht);
+    const nav = E('div', 'day-nav', null, head);
+    const nb = (label, dir, path) => {
+      const b = E('button', 'icon-btn', null, nav); b.type = 'button'; b.setAttribute('aria-label', label);
+      const s = S('svg', { viewBox: '0 0 20 20' }, b); S('path', { d: path, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, s);
+      b.addEventListener('click', () => selectDay(addDays(d, dir), { open: false, keep: true }));
+      if (dir > 0 && d >= todayISO()) b.disabled = true;
+    };
+    nb('Vorige dag', -1, 'M12.5 4.5 7 10l5.5 5.5');
+    nb('Volgende dag', 1, 'M7.5 4.5 13 10l-5.5 5.5');
+    const group = (title, keys, notes, extra) => {
+      const present = keys.filter((k) => r[k] != null);
+      if (!present.length && !notes && !extra) return;
+      const g = E('div', 'day-group', null, box);
+      E('h4', null, title, g);
+      if (present.length) {
+        const dl = E('dl', 'kv', null, g);
+        for (const k of present) {
+          E('dt', null, M[k].label, dl);
+          const dd = E('dd', null, fmtMetric(k, r[k]), dl);
+          if (k === 'hrv') { const bl = baseline('hrv', d); if (bl) E('small', null, `normaal ${fmt(bl.lo, 0)}–${fmt(bl.hi, 0)}`, dd); }
+        }
+      }
+      if (notes) E('p', 'quote', notes, g);
+      if (extra) extra(g);
+    };
+    group('Gevoel', ['happy', 'energie', 'leven', 'prive', 'ziek', 'alcohol'], r.note);
+    group('Werk', ['wHappy', 'wStress', 'unclenched', 'workload'], r.workNote);
+    group('Lichaam', ['hrv', 'rhr'], null);
+    const acts = r.acts || [];
+    group('Training', acts.length ? ['hours', 'load', 'ctl', 'atl', 'form'] : ['ctl', 'atl', 'form'], null, acts.length ? (g) => {
+      const ul = E('ul', 'acts', null, g);
+      for (const a of acts) {
+        const li = E('li', null, null, ul);
+        E('span', null, `${a.type || 'Training'}${a.name ? ' · ' + a.name : ''}`, li);
+        E('b', null, `${fmtHours((a.sec || 0) / 3600)}${a.load ? ' · ' + fmt(a.load, 0) : ''}`, li);
+      }
+    } : null);
+    if (box.childElementCount <= 1) E('p', 'day-empty', 'Geen gegevens voor deze dag.', box);
+  }
+  function renderDayPanel(d) { if (isWide()) fillDay($('#dayPanel'), d); }
+  function selectDay(d, opts = {}) {
+    SELECTED = d;
+    renderDayPanel(d);
+    if (opts.open || (opts.keep && !$('#sheet').hidden)) openSheet(d);
+    for (const c of CHARTS) if (c instanceof CalendarChart && c.host.offsetParent) c.render();
+  }
+  function openSheet(d) {
+    const sh = $('#sheet'), bd = $('#sheetBackdrop');
+    fillDay($('#sheetBody'), d);
+    if (!sh.hidden) return;
+    sh.hidden = false; bd.hidden = false;
+    requestAnimationFrame(() => { sh.classList.add('open'); bd.classList.add('open'); });
+  }
+  function closeSheet() {
+    const sh = $('#sheet'), bd = $('#sheetBackdrop');
+    sh.classList.remove('open'); bd.classList.remove('open');
+    setTimeout(() => { sh.hidden = true; bd.hidden = true; }, 260);
+  }
+
+  // ================= Grafieken aanmaken =================
+  const L10 = { y: [1, 10], yTicks: [2, 4, 6, 8, 10] };
+  new TimeChart('c-gevoel', { id: 'gevoel', title: 'Gevoel', sub: 'Schaal 1–10', kind: 'line', smooth: true, height: () => (isTouchLayout() ? 200 : 260), ...L10,
+    series: [{ key: 'happy', label: 'Happyness', color: '--s1' }, { key: 'energie', label: 'Energie', color: '--s2' }, { key: 'leven', label: 'Levenscontentheid', color: '--s3' }] });
+  new TimeChart('c-stress', { id: 'stress', title: 'Stress', sub: 'Privé en werk, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10,
+    series: [{ key: 'prive', label: 'Privéstress', color: '--s1' }, { key: 'wStress', label: 'Werkstress', color: '--s2' }] });
+  new TimeChart('c-werk', { id: 'werk', title: 'Werk', sub: 'Uit Werkscore, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10,
+    series: [{ key: 'wHappy', label: 'Happyness', color: '--s1' }, { key: 'wStress', label: 'Stress', color: '--s2' }, { key: 'unclenched', label: 'Unclenched', color: '--s3' }, { key: 'workload', label: 'Workload', color: '--s4' }] });
+  new TimeChart('c-strip', { id: 'strip', title: 'Ziek en alcohol', sub: 'Per dag; donkerder is meer', kind: 'strip', height: 86, zoom: true, empty: 'Geen gegevens in deze periode',
+    series: [
+      { key: 'ziek', label: 'Ziek', ramp: ['--o1', '--o2', '--o3', '--o4'], level: (v) => (v <= 0 ? -1 : Math.min(3, v)) },
+      { key: 'alcohol', label: 'Alcohol', ramp: ['--a1', '--a2', '--a3', '--a4', '--a5'], level: (v) => (v <= 0 ? -1 : Math.min(4, Math.ceil(v / 2) - 1)) },
+    ],
+    extra: (box) => {
+      box.textContent = '';
+      const lg = E('div', 'scale-legend', null, box);
+      E('span', null, 'Ziek 1', lg); for (const c of ['--o2', '--o3', '--o4']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '3', lg);
+      E('span', null, '·  Alcohol 1', lg).style.marginLeft = '8px'; for (const c of ['--a1', '--a2', '--a3', '--a4', '--a5']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '10', lg);
+    } });
+  new TimeChart('c-hrv', { id: 'hrv', title: 'HRV (rMSSD)', sub: 'Grijze band: jouw normale bereik (28 dagen, ± 1 sd)', kind: 'line', smooth: true, band: 'hrv', height: () => (isTouchLayout() ? 210 : 240), empty: 'Nog geen HRV-metingen. Staat er een export in Apps › HRV4Training?',
+    series: [{ key: 'hrv', label: 'HRV', color: '--s1' }] });
+  new TimeChart('c-rhr', { id: 'rhr', title: 'Rusthartslag', sub: 'Slagen per minuut, ochtendmeting', kind: 'line', smooth: true, height: 180, empty: 'Nog geen rusthartslag-metingen',
+    series: [{ key: 'rhr', label: 'Rusthartslag', color: '--s1' }] });
+  new TimeChart('c-load', { id: 'load', title: 'Belasting', subFn: (bs) => (bs[0] && bs[0].week ? 'Per week (som)' : 'Per dag, trainingsbelasting'), kind: 'bar', agg: 'auto', height: 200, empty: 'Geen trainingen in deze periode',
+    series: [{ key: 'load', label: 'Belasting', color: '--s1' }] });
+  new TimeChart('c-hours', { id: 'hours', title: 'Trainingsuren', sub: 'Per week', kind: 'bar', agg: 'week', height: 200, empty: 'Geen trainingen in deze periode',
+    series: [{ key: 'hours', label: 'Uren', color: '--s1' }] });
+  new TimeChart('c-fit', { id: 'fit', title: 'Fitness en vermoeidheid', sub: 'Langetermijn- en kortetermijnbelasting', kind: 'line', height: 200, zero: true,
+    series: [{ key: 'ctl', label: 'Fitness', color: '--s1' }, { key: 'atl', label: 'Vermoeidheid', color: '--s2' }] });
+  new TimeChart('c-form', { id: 'form', title: 'Vorm', sub: 'Fitness min vermoeidheid; boven nul = fris', kind: 'div', agg: 'none', height: 200,
+    series: [{ key: 'form', label: 'Vorm', color: '--s1' }] });
+  const scatter = new ScatterChart('c-scatter');
+  new CalendarChart('c-cal');
+
+  // ================= Alles tekenen =================
+  function renderAll() {
+    ensureRange();
+    $('#rangeLabel').textContent = rangeText();
+    $('#nextBtn').disabled = RANGE.end >= lastDay();
+    $('#prevBtn').disabled = BOUNDS ? RANGE.start <= BOUNDS.first : false;
+    for (const b of $('#rangeSeg').children) b.setAttribute('aria-checked', String(b.dataset.p === RANGE.preset));
+    $('#resetZoom').hidden = RANGE.preset !== 'zoom';
+    $('#zoomHint').hidden = RANGE.preset === 'zoom' || isTouchLayout();
+    $('#smoothBtn').setAttribute('aria-pressed', String(SMOOTH));
+    renderTiles();
+    renderFindings();
+    renderNoteList($('#noteList'), noteItems(rangeDays()).slice(0, 4), 'Geen notities in deze periode.');
+    const diary = noteItems(rangeDays());
+    $('#diarySub').textContent = `${diary.length} ${diary.length === 1 ? 'notitie' : 'notities'} · ${rangeText()}`;
+    renderNoteList($('#diaryList'), diary, 'Geen notities in deze periode.');
+    for (const c of CHARTS) c.render();
+    $('#icuMissing').hidden = !!((icuCfg() && icuCfg().key) || (RAW.icu && (RAW.icu.activities || []).length));
+    const hrvName = RAW.hrv && RAW.hrv.name;
+    $('#hrvSource').textContent = hrvName ? `Bron: HRV4Training · ${hrvName}` : (RAW.icu ? 'Bron: intervals.icu' : '');
+    if (!SELECTED) SELECTED = lastDay();
+    renderDayPanel(SELECTED);
+    $('#welcome').hidden = !!(isLinked() || (icuCfg() && icuCfg().key) || DATA.size);
+  }
+
+  // ================= Gegevens ophalen =================
+  function setSync(state, text) {
+    const s = $('#syncState');
+    s.className = 'sync' + (state === 'err' ? ' err' : '');
+    s.textContent = text || '';
+    $('#refreshBtn').classList.toggle('busy', state === 'busy');
+  }
+  function sinceText(t) {
+    if (!t) return '';
+    const m = Math.round((Date.now() - t) / 60000);
+    return m < 1 ? 'Zojuist bijgewerkt' : m < 60 ? `${m} min geleden bijgewerkt` : `Bijgewerkt ${new Date(t).toLocaleString('nl-NL', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}`;
+  }
+  async function refresh() {
+    if (BUSY) return;
+    BUSY = true;
+    setSync('busy', 'Bijwerken…');
+    for (const c of CHARTS) if (c.plot) c.plot.classList.add('stale');
+    const status = {};
+    const next = { ...RAW };
+    const jobs = [];
+    if (isLinked()) {
+      jobs.push((async () => {
+        try { const r = await readScoreFile(CFG.scoresPath, CFG.scoresName); next.scores = { text: r.text, path: r.path }; status.scores = { ok: true, text: `${r.path}` }; }
+        catch (e) { status.scores = { ok: false, text: e instanceof NeedLogin ? 'Dropbox-koppeling verlopen' : e.message }; }
+      })());
+      jobs.push((async () => {
+        try { const r = await readScoreFile(CFG.workPath, CFG.workName); next.work = { text: r.text, path: r.path }; status.work = { ok: true, text: `${r.path}` }; }
+        catch (e) { status.work = { ok: false, text: e instanceof NeedLogin ? 'Dropbox-koppeling verlopen' : e.message }; }
+      })());
+      jobs.push((async () => {
+        try {
+          const entries = (await dbxList(CFG.hrvFolder)).filter((e) => e['.tag'] === 'file' && /\.(csv|txt)$/i.test(e.name));
+          if (!entries.length) throw new Error('geen exportbestanden in Apps › HRV4Training.');
+          entries.sort((a, b) => (b.server_modified || '').localeCompare(a.server_modified || ''));
+          const f = entries[0];
+          const text = await dbxDownload(f.path_lower);
+          next.hrv = { text, name: f.name, modified: f.server_modified };
+          status.hrv = { ok: true, text: `${f.name} (nieuwste van ${entries.length})` };
+        } catch (e) {
+          status.hrv = { ok: false, text: e instanceof NeedLogin ? 'Dropbox-koppeling verlopen'
+            : /not_found/.test(e.summary || e.message) ? 'Map Apps › HRV4Training niet gevonden (heeft de app toegang tot je hele Dropbox?)' : e.message };
+        }
+      })());
+    }
+    const ic = icuCfg();
+    if (ic && ic.key) {
+      jobs.push((async () => {
+        try {
+          const to = todayISO(), from = addDays(to, -CFG.icuDays);
+          const [wellness, acts] = await Promise.all([
+            icuGet('wellness', { oldest: from, newest: to }),
+            icuGet('activities', { oldest: from, newest: to }),
+          ]);
+          next.icu = {
+            from, to,
+            wellness: (wellness || []).map((w) => ({ d: w.id, ctl: w.ctl ?? null, atl: w.atl ?? null, hrv: w.hrv ?? null, rhr: w.restingHR ?? null })),
+            activities: (acts || []).filter((a) => a.start_date_local).map((a) => ({
+              d: a.start_date_local.slice(0, 10), type: a.type || '', name: a.name || '',
+              sec: a.moving_time || a.elapsed_time || 0, load: a.icu_training_load ?? a.training_load ?? 0,
+            })),
+          };
+          status.icu = { ok: true, text: `${next.icu.activities.length} trainingen, ${next.icu.wellness.length} dagen fitness` };
+        } catch (e) { status.icu = { ok: false, text: e.message }; }
+      })());
+    }
+    await Promise.all(jobs);
+    next.status = status;
+    next.at = Date.now();
+    RAW = next;
+    store.set(K.cache, RAW);
+    BUSY = false;
+    buildModel();
+    if (RANGE.preset !== 'zoom') { const p = RANGE.preset; RANGE.start = null; RANGE.preset = p; }
+    renderAll();
+    const errs = Object.values(status).filter((s) => !s.ok);
+    setSync(errs.length ? 'err' : 'ok', errs.length ? `${errs.length} ${errs.length === 1 ? 'bron' : 'bronnen'} niet gelukt` : sinceText(RAW.at));
+    renderSources();
+    if (!isLinked() && !(ic && ic.key)) setSync('ok', '');
+  }
+  function renderSources() {
+    const ul = $('#srcList');
+    ul.textContent = '';
+    const st = RAW.status || {};
+    const rows = [
+      ['Dagscores', st.scores, isLinked()], ['Werkscores', st.work, isLinked()], ['HRV4Training', st.hrv, isLinked()], ['intervals.icu', st.icu, !!(icuCfg() && icuCfg().key)],
+    ];
+    for (const [name, s, on] of rows) {
+      const li = E('li', s ? (s.ok ? 'ok' : 'err') : '', null, ul);
+      E('i', null, null, li);
+      const t = E('div', null, null, li);
+      E('b', null, name, t);
+      E('span', null, !on ? 'Niet gekoppeld' : s ? s.text : 'Nog niet opgehaald', t);
+    }
+    if (RAW.hrv && RAW.hrv.cols) {
+      const c = RAW.hrv.cols;
+      const li = E('li', null, null, ul); E('i', null, null, li).style.visibility = 'hidden';
+      const t = E('div', null, null, li);
+      E('span', null, `HRV-kolommen herkend: datum “${c.date || '?'}”, HRV “${c.rmssd || '–'}”, hartslag “${c.hr || '–'}”`, t);
+    }
+    $('#dbxConnect').hidden = isLinked();
+    $('#dbxDisconnect').hidden = !isLinked();
+    $('#dbxText').textContent = isLinked()
+      ? 'Gekoppeld. Leest Scores.csv en WorkScores.csv uit Apps › Scores en het nieuwste bestand uit Apps › HRV4Training.'
+      : 'Leest Scores.csv en WorkScores.csv uit Apps › Scores en het nieuwste bestand uit Apps › HRV4Training.';
+    const ic = icuCfg();
+    $('#icuClear').hidden = !(ic && ic.key);
+    $('#icuAthlete').value = (ic && ic.athlete) || '';
+    $('#icuKey').value = '';
+    $('#icuKey').placeholder = ic && ic.key ? 'Opgeslagen — vul in om te vervangen' : 'Settings › Developer Settings';
+  }
+
+  // ================= Bediening =================
+  const seg = $('#rangeSeg');
+  for (const [p] of PRESETS) {
+    const b = E('button', null, p, seg);
+    b.type = 'button'; b.dataset.p = p; b.setAttribute('role', 'radio');
+    b.addEventListener('click', () => setPreset(p));
+  }
+  $('#prevBtn').addEventListener('click', () => stepRange(-1));
+  $('#nextBtn').addEventListener('click', () => stepRange(1));
+  $('#rangeLabel').addEventListener('click', () => setPreset(RANGE.preset === 'zoom' ? '30D' : RANGE.preset));
+  $('#resetZoom').addEventListener('click', resetZoom);
+  $('#smoothBtn').addEventListener('click', () => { SMOOTH = !SMOOTH; store.set(K.smooth, SMOOTH); renderAll(); });
+  $('#refreshBtn').addEventListener('click', refresh);
+  const dlg = $('#settings');
+  const openSettings = () => { renderSources(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); };
+  $('#settingsBtn').addEventListener('click', openSettings);
+  $('#welcomeSettings').addEventListener('click', openSettings);
+  document.querySelectorAll('[data-open-settings]').forEach((b) => b.addEventListener('click', openSettings));
+  $('#closeSettings').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  $('#dbxConnect').addEventListener('click', startLogin);
+  $('#welcomeDbx').addEventListener('click', startLogin);
+  $('#dbxDisconnect').addEventListener('click', () => {
+    saveAuth(null);
+    delete RAW.scores; delete RAW.work; delete RAW.hrv;
+    store.set(K.cache, RAW);
+    buildModel(); renderAll(); renderSources();
+  });
+  $('#icuSave').addEventListener('click', () => {
+    const key = $('#icuKey').value.trim();
+    const athlete = $('#icuAthlete').value.trim();
+    const prev = icuCfg() || {};
+    if (!key && !prev.key) { $('#icuKey').focus(); return; }
+    store.set(K.icu, { key: key || prev.key, athlete });
+    renderSources();
+    refresh();
+  });
+  $('#icuClear').addEventListener('click', () => {
+    store.del(K.icu);
+    delete RAW.icu;
+    store.set(K.cache, RAW);
+    buildModel(); renderAll(); renderSources();
+  });
+  $('#settingsRefresh').addEventListener('click', refresh);
+  $('#sheetBackdrop').addEventListener('click', closeSheet);
+  $('#sheetDone').addEventListener('click', closeSheet);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+  // sleep het blad omlaag om te sluiten
+  (() => {
+    const sh = $('#sheet');
+    let y0 = null;
+    sh.addEventListener('touchstart', (e) => { if (sh.scrollTop <= 0) y0 = e.touches[0].clientY; }, { passive: true });
+    sh.addEventListener('touchmove', (e) => { if (y0 != null && e.touches[0].clientY - y0 > 0) sh.style.transform = `translateY(${e.touches[0].clientY - y0}px)`; }, { passive: true });
+    sh.addEventListener('touchend', (e) => {
+      if (y0 == null) return;
+      const dy = e.changedTouches[0].clientY - y0;
+      sh.style.transform = '';
+      y0 = null;
+      if (dy > 90) closeSheet();
+    });
+  })();
+
+  // Tabs (iPhone) en navigatie (Mac)
+  function showTab(name) {
+    document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.dataset.view === name));
+    document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+    store.set(K.tab, name);
+    window.scrollTo({ top: 0 });
+    for (const c of CHARTS) if (c.host.closest('.view') && c.host.closest('.view').dataset.view === name) c.render();
+  }
+  document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab)));
+  showTab(store.get(K.tab, 'overzicht'));
+  const navLinks = [...document.querySelectorAll('.desk-nav a')];
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) if (en.isIntersecting) navLinks.forEach((a) => a.classList.toggle('on', a.dataset.nav === en.target.id));
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  document.querySelectorAll('.view').forEach((v) => io.observe(v));
+  let wasTouch = isTouchLayout();
+  window.addEventListener('resize', () => { const t = isTouchLayout(); if (t !== wasTouch) { wasTouch = t; renderAll(); } });
+
+  // Nieuwe versie op de site? Dan opnieuw laden.
+  async function checkVersion() {
+    const meta = document.querySelector('meta[name="dashboard-versie"]');
+    if (!meta || BUSY) return;
+    try {
+      const res = await fetch(location.pathname + '?check=' + Date.now(), { cache: 'no-store' });
+      const m = (await res.text()).match(/name="dashboard-versie" content="([^"]+)"/);
+      if (m && m[1] !== meta.content && new URLSearchParams(location.search).get('v') !== m[1]) location.replace(location.pathname + '?v=' + m[1]);
+    } catch (e) { /* offline */ }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    checkVersion();
+    if (!RAW.at || Date.now() - RAW.at > 10 * 60000) refresh();
+  });
+
+  // ================= Start =================
+  buildModel();
+  renderAll();
+  setSync('ok', sinceText(RAW.at));
+  (async () => {
+    let returning = false;
+    try { returning = await finishLogin(); }
+    catch (err) { returning = true; setSync('err', 'Inloggen bij Dropbox lukte niet: ' + (err.message || err)); }
+    if (!returning) checkVersion();
+    if (isLinked() || (icuCfg() && icuCfg().key)) refresh();
+  })();
+
+  // voor tests
+  window.__dash = { parseDelimited, dateParser, buildModel: () => { buildModel(); renderAll(); }, setRaw: (r) => { RAW = r; buildModel(); RANGE.start = null; renderAll(); }, M };
+})();
+</script>
+</body>
+</html>
