@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="50fcb43d67">
+<meta name="dashboard-versie" content="e41453c130">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -815,6 +815,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     prive: { label: 'Privéstress', short: 'Privé', src: 'scores', col: 'Privestress', min: 1, max: 10, good: 'down', d: 1 },
     ziek: { label: 'Ziek', src: 'scores', col: 'Ziek', min: 0, max: 3, good: 'down', zero: true, d: 1 },
     alcohol: { label: 'Alcohol', src: 'scores', col: 'Alcohol', min: 0, max: 10, good: 'down', zero: true, d: 1 },
+    drugs: { label: 'Drugs', src: 'scores', col: 'Drugs', min: 0, max: 3, good: 'down', zero: true, d: 1 },
     wHappy: { label: 'Happyness werk', short: 'Happy', src: 'work', col: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
     wStress: { label: 'Werkstress', short: 'Stress', src: 'work', col: 'Stress', min: 1, max: 10, good: 'down', d: 1 },
     unclenched: { label: 'Unclenched', src: 'work', col: 'Unclenched', min: 1, max: 10, good: 'up', d: 1 },
@@ -1431,7 +1432,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   }
 
   // ================= Spreidingsdiagram (verkenner) =================
-  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'alcohol', 'ziek', 'mSlaap', 'mWakker', 'mGevoel', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
+  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'alcohol', 'drugs', 'ziek', 'mSlaap', 'mWakker', 'mGevoel', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
   function pairs(xk, yk, lag, days) {
     const out = [];
     for (const d of days) {
@@ -1733,7 +1734,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   const CANDIDATES = [
     ['alcohol', 'hrv', 1], ['alcohol', 'happy', 1], ['alcohol', 'energie', 1], ['load', 'hrv', 1], ['load', 'energie', 1],
     ['hours', 'happy', 0], ['wStress', 'hrv', 1], ['wStress', 'happy', 0], ['prive', 'happy', 0], ['prive', 'hrv', 1],
-    ['workload', 'wStress', 0], ['hrv', 'energie', 0], ['alcohol', 'mSlaap', 1], ['mSlaap', 'energie', 0], ['mSlaap', 'hrv', 0],
+    ['workload', 'wStress', 0], ['hrv', 'energie', 0], ['alcohol', 'mSlaap', 1], ['drugs', 'hrv', 1], ['drugs', 'mSlaap', 1], ['drugs', 'happy', 1], ['mSlaap', 'energie', 0], ['mSlaap', 'hrv', 0],
     ['load', 'mSlaap', 1], ['wStress', 'mSlaap', 1], ['mWakker', 'happy', 0], ['ziek', 'happy', 0], ['unclenched', 'happy', 0], ['rhr', 'energie', 0],
   ];
   function renderFindings() {
@@ -1839,7 +1840,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       if (extra) extra(g);
     };
     group('Ochtend', ['mSlaap', 'mWakker', 'mGevoel'], r.morningNote);
-    group('Gevoel', ['happy', 'energie', 'leven', 'prive', 'ziek', 'alcohol'], r.note);
+    group('Gevoel', ['happy', 'energie', 'leven', 'prive', 'ziek', 'alcohol', 'drugs'], r.note);
     group('Werk', ['wHappy', 'wStress', 'unclenched', 'workload'], r.workNote);
     group('Lichaam', ['hrv', 'rhr'], null);
     const acts = r.acts || [];
@@ -1881,15 +1882,16 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     series: [{ key: 'prive', label: 'Privéstress', color: '--s1' }, { key: 'wStress', label: 'Werkstress', color: '--s2' }] });
   new TimeChart('c-werk', { id: 'werk', title: 'Werk', sub: 'Uit Werkscore, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10,
     series: [{ key: 'wHappy', label: 'Happyness', color: '--s1' }, { key: 'wStress', label: 'Stress', color: '--s2' }, { key: 'unclenched', label: 'Unclenched', color: '--s3' }, { key: 'workload', label: 'Workload', color: '--s4' }] });
-  new TimeChart('c-strip', { id: 'strip', title: 'Ziek en alcohol', sub: 'Per dag; donkerder is meer', kind: 'strip', height: 86, zoom: true, empty: 'Geen gegevens in deze periode',
+  new TimeChart('c-strip', { id: 'strip', title: 'Ziek, alcohol en drugs', sub: 'Per dag; donkerder is meer', kind: 'strip', height: 116, zoom: true, empty: 'Geen gegevens in deze periode',
     series: [
       { key: 'ziek', label: 'Ziek', ramp: ['--o1', '--o2', '--o3', '--o4'], level: (v) => (v <= 0 ? -1 : Math.min(3, v)) },
       { key: 'alcohol', label: 'Alcohol', ramp: ['--a1', '--a2', '--a3', '--a4', '--a5'], level: (v) => (v <= 0 ? -1 : Math.min(4, Math.ceil(v / 2) - 1)) },
+      { key: 'drugs', label: 'Drugs', ramp: ['--o1', '--o2', '--o3', '--o4'], level: (v) => (v <= 0 ? -1 : Math.min(3, v)) },
     ],
     extra: (box) => {
       box.textContent = '';
       const lg = E('div', 'scale-legend', null, box);
-      E('span', null, 'Ziek 1', lg); for (const c of ['--o2', '--o3', '--o4']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '3', lg);
+      E('span', null, 'Ziek en drugs 1', lg); for (const c of ['--o2', '--o3', '--o4']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '3', lg);
       E('span', null, '·  Alcohol 1', lg).style.marginLeft = '8px'; for (const c of ['--a1', '--a2', '--a3', '--a4', '--a5']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '10', lg);
     } });
   new TimeChart('c-hrv', { id: 'hrv', title: 'HRV (rMSSD)', sub: 'Grijze band: jouw normale bereik (28 dagen, ± 1 sd)', kind: 'line', smooth: true, band: 'hrv', height: () => (isTouchLayout() ? 210 : 240), empty: 'Nog geen HRV-metingen. Staat er een export in Apps › HRV4Training?',
