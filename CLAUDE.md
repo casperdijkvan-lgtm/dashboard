@@ -43,7 +43,7 @@ niet, pas dan de bestanden aan (via een eenmalige omzetting in de score-apps), n
 
 Kolomnamen en schalen moeten overeenkomen met de vragen in `casperdijkvan-lgtm/dagscore`
 (`bron/dagscore.html` en `bron/build_site.py`). Huidige schalen: Happiness/Energie/Levenscontentheid/
-Unclenched/Workload/Slaap/Gevoel 1–10, Privestress en werk-Stress 0–5, Ziek en Drugs 0–3, Alcohol 0–10,
+Unclenched/Workload/Slaap/Gevoel/Robin 1–10, Privestress en werk-Stress 0–5, Ziek, Drugs en Vrienden 0–3, Alcohol 0–10,
 Wakker 0–4 (halve punten). Verandert daar iets, pas dan `M` en de grafieken hier aan.
 
 ## Wensen van de gebruiker
