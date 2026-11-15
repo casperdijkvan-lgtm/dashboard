@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="c12c3f0021">
+<meta name="dashboard-versie" content="846671330b">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -809,14 +809,14 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
 
   // ================= Meetwaarden =================
   const M = {
-    happy: { label: 'Happyness', short: 'Happy', src: 'scores', col: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
+    happy: { label: 'Happiness', short: 'Happy', src: 'scores', col: 'Happiness', oldCol: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
     energie: { label: 'Energie', src: 'scores', col: 'Energie', min: 1, max: 10, good: 'up', d: 1 },
     leven: { label: 'Levenscontentheid', short: 'Leven', src: 'scores', col: 'Levenscontentheid', min: 1, max: 10, good: 'up', d: 1 },
     prive: { label: 'Privéstress', short: 'Privé', src: 'scores', col: 'Privestress', min: 0, max: 5, good: 'down', zero: 'after-first', d: 1 },
     ziek: { label: 'Ziek', src: 'scores', col: 'Ziek', min: 0, max: 3, good: 'down', zero: true, d: 1 },
     alcohol: { label: 'Alcohol', src: 'scores', col: 'Alcohol', min: 0, max: 10, good: 'down', zero: true, d: 1 },
     drugs: { label: 'Drugs', src: 'scores', col: 'Drugs', min: 0, max: 3, good: 'down', zero: true, d: 1 },
-    wHappy: { label: 'Happyness werk', short: 'Happy', src: 'work', col: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
+    wHappy: { label: 'Happiness werk', short: 'Happy', src: 'work', col: 'Happiness', oldCol: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
     wStress: { label: 'Werkstress', short: 'Stress', src: 'work', col: 'Stress', min: 0, max: 5, good: 'down', zero: 'after-first', d: 1 },
     unclenched: { label: 'Unclenched', src: 'work', col: 'Unclenched', min: 1, max: 10, good: 'up', d: 1 },
     workload: { label: 'Workload', src: 'work', col: 'Workload', min: 1, max: 10, good: null, d: 1 },
@@ -870,7 +870,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
         const r = rec(d);
         for (const [key, m] of Object.entries(M)) {
           if (m.src !== src) continue;
-          const i = t.header.indexOf(m.col);
+          // oldCol: oude kolomnaam, voor bestanden die de score-app nog niet heeft omgezet
+          let i = t.header.indexOf(m.col);
+          if (i < 0 && m.oldCol) i = t.header.indexOf(m.oldCol);
           if (i < 0) continue;
           const v = num(row[i]);
           // Nullen vóór de eerste ingevulde dag betekenen "vraag bestond nog niet"
@@ -1882,11 +1884,11 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   // ================= Grafieken aanmaken =================
   const L10 = { y: [1, 10], yTicks: [2, 4, 6, 8, 10] };
   new TimeChart('c-gevoel', { id: 'gevoel', title: 'Gevoel', sub: 'Schaal 1–10', kind: 'line', smooth: true, height: () => (isTouchLayout() ? 200 : 260), ...L10,
-    series: [{ key: 'happy', label: 'Happyness', color: '--s1' }, { key: 'energie', label: 'Energie', color: '--s2' }, { key: 'leven', label: 'Levenscontentheid', color: '--s3' }] });
+    series: [{ key: 'happy', label: 'Happiness', color: '--s1' }, { key: 'energie', label: 'Energie', color: '--s2' }, { key: 'leven', label: 'Levenscontentheid', color: '--s3' }] });
   new TimeChart('c-stress', { id: 'stress', title: 'Stress', sub: 'Privé en werk, schaal 0–5', kind: 'line', smooth: true, height: 200, y: [0, 5], yTicks: [0, 1, 2, 3, 4, 5],
     series: [{ key: 'prive', label: 'Privéstress', color: '--s1' }, { key: 'wStress', label: 'Werkstress', color: '--s2' }] });
   new TimeChart('c-werk', { id: 'werk', title: 'Werk', sub: 'Uit Werkscore, schaal 1–10 (stress staat hierboven)', kind: 'line', smooth: true, height: 200, ...L10,
-    series: [{ key: 'wHappy', label: 'Happyness', color: '--s1' }, { key: 'unclenched', label: 'Unclenched', color: '--s3' }, { key: 'workload', label: 'Workload', color: '--s4' }] });
+    series: [{ key: 'wHappy', label: 'Happiness', color: '--s1' }, { key: 'unclenched', label: 'Unclenched', color: '--s3' }, { key: 'workload', label: 'Workload', color: '--s4' }] });
   new TimeChart('c-strip', { id: 'strip', title: 'Ziek, alcohol en drugs', sub: 'Per dag; donkerder is meer', kind: 'strip', height: 116, zoom: true, empty: 'Geen gegevens in deze periode',
     series: [
       { key: 'ziek', label: 'Ziek', ramp: ['--o1', '--o2', '--o3', '--o4'], level: (v) => (v <= 0 ? -1 : Math.min(3, v)) },
