@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="e41453c130">
+<meta name="dashboard-versie" content="bae31d8ed3">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -781,6 +781,13 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     files.sort((a, b) => (b.server_modified || '').localeCompare(a.server_modified || ''));
     return files[0] ? files[0].path_lower : null;
   }
+  // Hebben Dagscore/Werkscore de eenmalige omzetting naar 0–5 al gedaan? (markeringsbestand naast de CSV)
+  // Pas na het lezen van de CSV kijken: zo wordt een al omgezet bestand nooit nog eens omgezet.
+  async function pendingShifts(csvPath, id) {
+    const dir = csvPath.slice(0, csvPath.lastIndexOf('/'));
+    const mk = await dbxDownload(`${dir}/omzetting-${id}.txt`).catch(() => null);
+    return mk && /^klaar/.test(mk) ? [] : [id];
+  }
   async function readScoreFile(path, name) {
     let text = await dbxDownload(path);
     let used = path;
@@ -812,12 +819,12 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     happy: { label: 'Happyness', short: 'Happy', src: 'scores', col: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
     energie: { label: 'Energie', src: 'scores', col: 'Energie', min: 1, max: 10, good: 'up', d: 1 },
     leven: { label: 'Levenscontentheid', short: 'Leven', src: 'scores', col: 'Levenscontentheid', min: 1, max: 10, good: 'up', d: 1 },
-    prive: { label: 'Privéstress', short: 'Privé', src: 'scores', col: 'Privestress', min: 1, max: 10, good: 'down', d: 1 },
+    prive: { label: 'Privéstress', short: 'Privé', src: 'scores', col: 'Privestress', min: 0, max: 5, good: 'down', zero: 'after-first', shift: 'privestress-0-5', d: 1 },
     ziek: { label: 'Ziek', src: 'scores', col: 'Ziek', min: 0, max: 3, good: 'down', zero: true, d: 1 },
     alcohol: { label: 'Alcohol', src: 'scores', col: 'Alcohol', min: 0, max: 10, good: 'down', zero: true, d: 1 },
     drugs: { label: 'Drugs', src: 'scores', col: 'Drugs', min: 0, max: 3, good: 'down', zero: true, d: 1 },
     wHappy: { label: 'Happyness werk', short: 'Happy', src: 'work', col: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
-    wStress: { label: 'Werkstress', short: 'Stress', src: 'work', col: 'Stress', min: 1, max: 10, good: 'down', d: 1 },
+    wStress: { label: 'Werkstress', short: 'Stress', src: 'work', col: 'Stress', min: 0, max: 5, good: 'down', zero: 'after-first', shift: 'werkstress-0-5', d: 1 },
     unclenched: { label: 'Unclenched', src: 'work', col: 'Unclenched', min: 1, max: 10, good: 'up', d: 1 },
     workload: { label: 'Workload', src: 'work', col: 'Workload', min: 1, max: 10, good: null, d: 1 },
     mSlaap: { label: 'Slaap', src: 'morning', col: 'Slaap', min: 1, max: 10, good: 'up', d: 1 },
@@ -862,6 +869,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       const t = parseDelimited(raw.text);
       const di = t.header.indexOf('Datum');
       const ci = t.header.indexOf('Comment');
+      const pending = new Set(raw.pending || []);
+      const seen = new Set();
+      t.rows.sort((a, b) => String(a[di] || '').localeCompare(String(b[di] || '')));
       for (const row of t.rows) {
         const d = (row[di] || '').trim();
         if (!validDate(d)) continue;
@@ -870,8 +880,13 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
           if (m.src !== src) continue;
           const i = t.header.indexOf(m.col);
           if (i < 0) continue;
-          const v = num(row[i]);
-          if (v == null || (v === 0 && !m.zero) || v < m.min || v > m.max) continue;
+          let v = num(row[i]);
+          // Nog niet omgezet door de app (oude schaal 1–10): 5→0 … 10→5
+          if (v != null && m.shift && pending.has(m.shift)) v = v >= 5 ? v - 5 : 0;
+          // Nullen vóór de eerste ingevulde dag betekenen "vraag bestond nog niet"
+          const zeroOk = m.zero === 'after-first' ? seen.has(key) : !!m.zero;
+          if (v == null || (v === 0 && !zeroOk) || v < m.min || v > m.max) continue;
+          if (v !== 0 || m.zero !== 'after-first') seen.add(key);
           r[key] = v;
         }
         const c = ci >= 0 ? (row[ci] || '').trim() : '';
@@ -1878,10 +1893,10 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   const L10 = { y: [1, 10], yTicks: [2, 4, 6, 8, 10] };
   new TimeChart('c-gevoel', { id: 'gevoel', title: 'Gevoel', sub: 'Schaal 1–10', kind: 'line', smooth: true, height: () => (isTouchLayout() ? 200 : 260), ...L10,
     series: [{ key: 'happy', label: 'Happyness', color: '--s1' }, { key: 'energie', label: 'Energie', color: '--s2' }, { key: 'leven', label: 'Levenscontentheid', color: '--s3' }] });
-  new TimeChart('c-stress', { id: 'stress', title: 'Stress', sub: 'Privé en werk, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10,
+  new TimeChart('c-stress', { id: 'stress', title: 'Stress', sub: 'Privé en werk, schaal 0–5', kind: 'line', smooth: true, height: 200, y: [0, 5], yTicks: [0, 1, 2, 3, 4, 5],
     series: [{ key: 'prive', label: 'Privéstress', color: '--s1' }, { key: 'wStress', label: 'Werkstress', color: '--s2' }] });
-  new TimeChart('c-werk', { id: 'werk', title: 'Werk', sub: 'Uit Werkscore, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10,
-    series: [{ key: 'wHappy', label: 'Happyness', color: '--s1' }, { key: 'wStress', label: 'Stress', color: '--s2' }, { key: 'unclenched', label: 'Unclenched', color: '--s3' }, { key: 'workload', label: 'Workload', color: '--s4' }] });
+  new TimeChart('c-werk', { id: 'werk', title: 'Werk', sub: 'Uit Werkscore, schaal 1–10 (stress staat hierboven)', kind: 'line', smooth: true, height: 200, ...L10,
+    series: [{ key: 'wHappy', label: 'Happyness', color: '--s1' }, { key: 'unclenched', label: 'Unclenched', color: '--s3' }, { key: 'workload', label: 'Workload', color: '--s4' }] });
   new TimeChart('c-strip', { id: 'strip', title: 'Ziek, alcohol en drugs', sub: 'Per dag; donkerder is meer', kind: 'strip', height: 116, zoom: true, empty: 'Geen gegevens in deze periode',
     series: [
       { key: 'ziek', label: 'Ziek', ramp: ['--o1', '--o2', '--o3', '--o4'], level: (v) => (v <= 0 ? -1 : Math.min(3, v)) },
@@ -1960,11 +1975,11 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     const jobs = [];
     if (isLinked()) {
       jobs.push((async () => {
-        try { const r = await readScoreFile(CFG.scoresPath, CFG.scoresName); next.scores = { text: r.text, path: r.path }; status.scores = { ok: true, text: `${r.path}` }; }
+        try { const r = await readScoreFile(CFG.scoresPath, CFG.scoresName); next.scores = { text: r.text, path: r.path, pending: await pendingShifts(r.path, 'privestress-0-5') }; status.scores = { ok: true, text: `${r.path}` }; }
         catch (e) { status.scores = { ok: false, text: e instanceof NeedLogin ? 'Dropbox-koppeling verlopen' : e.message }; }
       })());
       jobs.push((async () => {
-        try { const r = await readScoreFile(CFG.workPath, CFG.workName); next.work = { text: r.text, path: r.path }; status.work = { ok: true, text: `${r.path}` }; }
+        try { const r = await readScoreFile(CFG.workPath, CFG.workName); next.work = { text: r.text, path: r.path, pending: await pendingShifts(r.path, 'werkstress-0-5') }; status.work = { ok: true, text: `${r.path}` }; }
         catch (e) { status.work = { ok: false, text: e instanceof NeedLogin ? 'Dropbox-koppeling verlopen' : e.message }; }
       })());
       jobs.push((async () => {
@@ -2166,7 +2181,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   })();
 
   // voor tests
-  window.__dash = { parseDelimited, dateParser, buildModel: () => { buildModel(); renderAll(); }, setRaw: (r) => { RAW = r; buildModel(); RANGE.start = null; renderAll(); }, M };
+  window.__dash = { parseDelimited, dateParser, buildModel: () => { buildModel(); renderAll(); }, setRaw: (r) => { RAW = r; buildModel(); RANGE.start = null; renderAll(); }, M, data: () => DATA };
 })();
 </script>
 </body>
