@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="c12c3f0021">
+<meta name="dashboard-versie" content="595b144ebe">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -816,6 +816,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     ziek: { label: 'Ziek', src: 'scores', col: 'Ziek', min: 0, max: 3, good: 'down', zero: true, d: 1 },
     alcohol: { label: 'Alcohol', src: 'scores', col: 'Alcohol', min: 0, max: 10, good: 'down', zero: true, d: 1 },
     drugs: { label: 'Drugs', src: 'scores', col: 'Drugs', min: 0, max: 3, good: 'down', zero: true, d: 1 },
+    test2: { label: 'Test2', src: 'scores', col: 'Test2', min: 0, max: 7, good: null, zero: 'after-first', d: 1 },
     wHappy: { label: 'Happyness werk', short: 'Happy', src: 'work', col: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
     wStress: { label: 'Werkstress', short: 'Stress', src: 'work', col: 'Stress', min: 0, max: 5, good: 'down', zero: 'after-first', d: 1 },
     unclenched: { label: 'Unclenched', src: 'work', col: 'Unclenched', min: 1, max: 10, good: 'up', d: 1 },
@@ -1437,7 +1438,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   }
 
   // ================= Spreidingsdiagram (verkenner) =================
-  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'alcohol', 'drugs', 'ziek', 'mSlaap', 'mWakker', 'mGevoel', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
+  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'alcohol', 'drugs', 'ziek', 'test2', 'mSlaap', 'mWakker', 'mGevoel', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
   function pairs(xk, yk, lag, days) {
     const out = [];
     for (const d of days) {
@@ -1845,7 +1846,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       if (extra) extra(g);
     };
     group('Ochtend', ['mSlaap', 'mWakker', 'mGevoel'], r.morningNote);
-    group('Gevoel', ['happy', 'energie', 'leven', 'prive', 'ziek', 'alcohol', 'drugs'], r.note);
+    group('Gevoel', ['happy', 'energie', 'leven', 'prive', 'ziek', 'alcohol', 'drugs', 'test2'], r.note);
     group('Werk', ['wHappy', 'wStress', 'unclenched', 'workload'], r.workNote);
     group('Lichaam', ['hrv', 'rhr'], null);
     const acts = r.acts || [];
