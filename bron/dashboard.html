@@ -468,6 +468,10 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
         <div id="c-stress"></div>
         <div id="c-werk"></div>
       </div>
+      <div class="grid-2">
+        <div id="c-robin"></div>
+        <div id="c-vrienden"></div>
+      </div>
       <div id="c-strip"></div>
     </section>
 
@@ -816,6 +820,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     ziek: { label: 'Ziek', src: 'scores', col: 'Ziek', min: 0, max: 3, good: 'down', zero: true, d: 1 },
     alcohol: { label: 'Alcohol', src: 'scores', col: 'Alcohol', min: 0, max: 10, good: 'down', zero: true, d: 1 },
     drugs: { label: 'Drugs', src: 'scores', col: 'Drugs', min: 0, max: 3, good: 'down', zero: true, d: 1 },
+    vrienden: { label: 'Vrienden', src: 'scores', col: 'Vrienden', min: 0, max: 3, good: 'up', zero: 'after-first', d: 1 },
+    robin: { label: 'Robin', src: 'scores', col: 'Robin', min: 1, max: 10, good: 'up', d: 1 },
     wHappy: { label: 'Happyness werk', short: 'Happy', src: 'work', col: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
     wStress: { label: 'Werkstress', short: 'Stress', src: 'work', col: 'Stress', min: 0, max: 5, good: 'down', zero: 'after-first', d: 1 },
     unclenched: { label: 'Unclenched', src: 'work', col: 'Unclenched', min: 1, max: 10, good: 'up', d: 1 },
@@ -1437,7 +1443,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   }
 
   // ================= Spreidingsdiagram (verkenner) =================
-  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'alcohol', 'drugs', 'ziek', 'mSlaap', 'mWakker', 'mGevoel', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
+  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'vrienden', 'robin', 'alcohol', 'drugs', 'ziek', 'mSlaap', 'mWakker', 'mGevoel', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
   function pairs(xk, yk, lag, days) {
     const out = [];
     for (const d of days) {
@@ -1741,6 +1747,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     ['hours', 'happy', 0], ['wStress', 'hrv', 1], ['wStress', 'happy', 0], ['prive', 'happy', 0], ['prive', 'hrv', 1],
     ['workload', 'wStress', 0], ['hrv', 'energie', 0], ['alcohol', 'mSlaap', 1], ['drugs', 'hrv', 1], ['drugs', 'mSlaap', 1], ['drugs', 'happy', 1], ['mSlaap', 'energie', 0], ['mSlaap', 'hrv', 0],
     ['load', 'mSlaap', 1], ['wStress', 'mSlaap', 1], ['mWakker', 'happy', 0], ['ziek', 'happy', 0], ['unclenched', 'happy', 0], ['rhr', 'energie', 0],
+    ['vrienden', 'happy', 0], ['vrienden', 'prive', 0], ['robin', 'happy', 0], ['robin', 'prive', 0], ['mSlaap', 'robin', 0],
   ];
   function renderFindings() {
     const list = $('#findList');
@@ -1845,7 +1852,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       if (extra) extra(g);
     };
     group('Ochtend', ['mSlaap', 'mWakker', 'mGevoel'], r.morningNote);
-    group('Gevoel', ['happy', 'energie', 'leven', 'prive', 'ziek', 'alcohol', 'drugs'], r.note);
+    group('Gevoel', ['happy', 'energie', 'leven', 'prive', 'vrienden', 'robin', 'ziek', 'alcohol', 'drugs'], r.note);
     group('Werk', ['wHappy', 'wStress', 'unclenched', 'workload'], r.workNote);
     group('Lichaam', ['hrv', 'rhr'], null);
     const acts = r.acts || [];
@@ -1887,6 +1894,10 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     series: [{ key: 'prive', label: 'Privéstress', color: '--s1' }, { key: 'wStress', label: 'Werkstress', color: '--s2' }] });
   new TimeChart('c-werk', { id: 'werk', title: 'Werk', sub: 'Uit Werkscore, schaal 1–10 (stress staat hierboven)', kind: 'line', smooth: true, height: 200, ...L10,
     series: [{ key: 'wHappy', label: 'Happyness', color: '--s1' }, { key: 'unclenched', label: 'Unclenched', color: '--s3' }, { key: 'workload', label: 'Workload', color: '--s4' }] });
+  new TimeChart('c-robin', { id: 'robin', title: 'Robin', sub: 'Hoe ik naar Robin was, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Nog geen scores voor Robin in deze periode',
+    series: [{ key: 'robin', label: 'Robin', color: '--s1' }] });
+  new TimeChart('c-vrienden', { id: 'vrienden', title: 'Vrienden', sub: 'Contact met vrienden, schaal 0–3', kind: 'line', smooth: true, height: 200, y: [0, 3], yTicks: [0, 1, 2, 3], empty: 'Nog geen scores voor Vrienden in deze periode',
+    series: [{ key: 'vrienden', label: 'Vrienden', color: '--s3' }] });
   new TimeChart('c-strip', { id: 'strip', title: 'Ziek, alcohol en drugs', sub: 'Per dag; donkerder is meer', kind: 'strip', height: 116, zoom: true, empty: 'Geen gegevens in deze periode',
     series: [
       { key: 'ziek', label: 'Ziek', ramp: ['--o1', '--o2', '--o3', '--o4'], level: (v) => (v <= 0 ? -1 : Math.min(3, v)) },
