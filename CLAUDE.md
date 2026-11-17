@@ -30,6 +30,13 @@ Het leest (alleen lezen, nooit schrijven):
 - `M`: register van alle metrieken (kolomnaam `col`, bron `src`, schaal `min`/`max`, `good` up/down,
   `zero: true` als 0 een echte waarde is, `zero: 'after-first'` als nullen vóór de eerste ingevulde dag
   "nog niet gevraagd" betekenen).
+- `GROUPS`: de drie doelen waarop het dashboard is ingedeeld. **Beleving** (Happiness,
+  Levenscontentheid, Happiness werk, Robin, Vrienden), **Belasting** (privé- en werkstress, workload,
+  alcohol, drugs, slaap, wakker, trainingsbelasting/-uren, vermoeidheid, fitness) en **Gevolgen**
+  (energie, ochtendgevoel, HRV, rusthartslag, unclenched, ziek, vorm). De tabbladen/secties heten
+  Overzicht, Beleving, Belasting, Gevolgen, Inzicht; `TILE_GROUPS` geeft de tegels per doel, het
+  dagdetail en de Verkenner (optgroups) volgen `GROUPS`. Nieuwe metriek? Zet hem in `M`, in `GROUPS`
+  en in een grafiek op het juiste tabblad.
 - `buildModel()`: zet de CSV's en metingen om naar één record per datum.
 - `TimeChart` (line/bar/div/strip, week/dag, crosshair, zoom, tabelweergave), `ScatterChart`
   (verbanden met vertraging), `CalendarChart` (heatmap). Tegels, bevindingen (Pearson r), dagboek,

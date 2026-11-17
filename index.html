@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="c08035f240">
+<meta name="dashboard-versie" content="18a1f8efe3">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -185,6 +185,12 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 36px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .span-2 { grid-column: span 2; }
+.grp-title { margin: 8px 0 -4px; font-size: 13px; font-weight: 650; color: var(--ink-2); text-transform: uppercase; letter-spacing: .05em; }
+.grp-title span { text-transform: none; letter-spacing: 0; font-weight: 450; color: var(--muted); margin-left: 6px; }
+.tile-group { display: flex; flex-direction: column; gap: 8px; }
+.tile-group-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.tile-group-head h3 { margin: 0; font-size: 13px; font-weight: 650; color: var(--ink-2); text-transform: uppercase; letter-spacing: .05em; }
+.tile-group-head p { margin: 0; font-size: 12.5px; color: var(--muted); }
 
 .card {
   background: var(--card); border: 1px solid var(--hair); border-radius: var(--radius);
@@ -228,6 +234,7 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 36px; }
 .table-box th { position: sticky; top: 0; background: var(--card-2); font-weight: 600; color: var(--ink-2); }
 
 /* ---------- Tegels ---------- */
+#tiles { display: flex; flex-direction: column; gap: 16px; }
 .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .tile { padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 2px; cursor: default; }
 .tile-label { font-size: 12.5px; color: var(--ink-2); font-weight: 550; display: flex; justify-content: space-between; gap: 6px; }
@@ -354,6 +361,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
 }
 @media (max-width: 1000px) {
   .desk-nav { display: none; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -378,6 +386,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   .view.active { display: flex; }
   .sec-title { font-size: 28px; }
   .grid-2, .grid-3 { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .grp-title { margin: 6px 0 -2px; }
   .span-2 { grid-column: auto; }
   .card { padding: 14px 14px 12px; border-radius: 18px; }
   .tiles { gap: 10px; }
@@ -414,9 +423,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     </div>
     <nav class="desk-nav" aria-label="Onderdelen">
       <a href="#overzicht" data-nav="overzicht">Overzicht</a>
-      <a href="#welzijn" data-nav="welzijn">Welzijn</a>
-      <a href="#lichaam" data-nav="lichaam">Lichaam</a>
-      <a href="#training" data-nav="training">Training</a>
+      <a href="#beleving" data-nav="beleving">Beleving</a>
+      <a href="#belasting" data-nav="belasting">Belasting</a>
+      <a href="#gevolgen" data-nav="gevolgen">Gevolgen</a>
       <a href="#inzicht" data-nav="inzicht">Inzicht</a>
     </nav>
     <span class="spacer"></span>
@@ -454,39 +463,39 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
 
     <section class="view" id="overzicht" data-view="overzicht">
       <div class="sec-head"><h2 class="sec-title">Overzicht</h2><p class="sec-note" id="overNote"></p></div>
-      <div class="tiles" id="tiles"></div>
+      <div id="tiles"></div>
       <div class="grid-2">
         <div class="card" id="findCard"><div class="card-head"><div class="card-titles"><h3>Opvallend</h3><p class="card-sub">Samenhang in de gekozen periode, geen oorzaak</p></div></div><ul class="findings" id="findList"></ul></div>
         <div class="card" id="notesCard"><div class="card-head"><div class="card-titles"><h3>Laatste notities</h3><p class="card-sub">Uit je dagscores en werkscores</p></div></div><ul class="notes" id="noteList"></ul></div>
       </div>
     </section>
 
-    <section class="view" id="welzijn" data-view="welzijn">
-      <div class="sec-head"><h2 class="sec-title">Welzijn</h2></div>
-      <div id="c-gevoel"></div>
-      <div class="grid-2">
-        <div id="c-stress"></div>
-        <div id="c-werk"></div>
-      </div>
-      <div class="grid-2">
+    <section class="view" id="beleving" data-view="beleving">
+      <div class="sec-head"><h2 class="sec-title">Beleving</h2><p class="sec-note">Hoe je je dag en je leven beoordeelt</p></div>
+      <div id="c-beleving"></div>
+      <h3 class="grp-title">Werk en mensen</h3>
+      <div class="grid-3">
+        <div id="c-wbeleving"></div>
         <div id="c-robin"></div>
         <div id="c-vrienden"></div>
       </div>
-      <div id="c-strip"></div>
     </section>
 
-    <section class="view" id="lichaam" data-view="lichaam">
-      <div class="sec-head"><h2 class="sec-title">Lichaam</h2><p class="sec-note" id="hrvSource"></p></div>
-      <div id="c-hrv"></div>
+    <section class="view" id="belasting" data-view="belasting">
+      <div class="sec-head"><h2 class="sec-title">Belasting</h2><p class="sec-note">Wat op je inwerkt</p></div>
+      <h3 class="grp-title">Stress en werk</h3>
       <div class="grid-2">
-        <div id="c-ochtend"></div>
+        <div id="c-stress"></div>
+        <div id="c-workload"></div>
+      </div>
+      <h3 class="grp-title">Alcohol en drugs</h3>
+      <div id="c-middelen"></div>
+      <h3 class="grp-title">Slaap</h3>
+      <div class="grid-2">
+        <div id="c-slaap"></div>
         <div id="c-wakker"></div>
       </div>
-      <div id="c-rhr"></div>
-    </section>
-
-    <section class="view" id="training" data-view="training">
-      <div class="sec-head"><h2 class="sec-title">Training</h2><p class="sec-note">Bron: intervals.icu</p></div>
+      <h3 class="grp-title">Sport <span>Bron: intervals.icu</span></h3>
       <div class="card" id="icuMissing" hidden>
         <h3>Koppel intervals.icu</h3>
         <p class="muted-p">Vul in Instellingen je API-sleutel van intervals.icu in. Die vind je op intervals.icu onder Settings › Developer Settings.</p>
@@ -496,9 +505,20 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
         <div id="c-load"></div>
         <div id="c-hours"></div>
       </div>
+      <div id="c-fit"></div>
+    </section>
+
+    <section class="view" id="gevolgen" data-view="gevolgen">
+      <div class="sec-head"><h2 class="sec-title">Gevolgen</h2><p class="sec-note" id="hrvSource"></p></div>
+      <div id="c-hrv"></div>
+      <div id="c-energie"></div>
       <div class="grid-2">
-        <div id="c-fit"></div>
+        <div id="c-rhr"></div>
         <div id="c-form"></div>
+      </div>
+      <div class="grid-2">
+        <div id="c-unclenched"></div>
+        <div id="c-ziek"></div>
       </div>
     </section>
 
@@ -516,9 +536,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
 
 <nav class="tabbar" id="tabbar" role="tablist" aria-label="Onderdelen">
   <button class="tab" type="button" role="tab" data-tab="overzicht"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>Overzicht</button>
-  <button class="tab" type="button" role="tab" data-tab="welzijn"><svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Welzijn</button>
-  <button class="tab" type="button" role="tab" data-tab="lichaam"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Lichaam</button>
-  <button class="tab" type="button" role="tab" data-tab="training"><svg viewBox="0 0 24 24"><path d="M5 19V11M10 19V6M15 19v-5M20 19V9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>Training</button>
+  <button class="tab" type="button" role="tab" data-tab="beleving"><svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Beleving</button>
+  <button class="tab" type="button" role="tab" data-tab="belasting"><svg viewBox="0 0 24 24"><path d="M4.5 17a7.5 7.5 0 1 1 15 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 17l4-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/></svg>Belasting</button>
+  <button class="tab" type="button" role="tab" data-tab="gevolgen"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Gevolgen</button>
   <button class="tab" type="button" role="tab" data-tab="inzicht"><svg viewBox="0 0 24 24"><circle cx="7" cy="16" r="1.6" fill="currentColor"/><circle cx="11" cy="11" r="1.6" fill="currentColor"/><circle cx="15" cy="13" r="1.6" fill="currentColor"/><circle cx="18" cy="7" r="1.6" fill="currentColor"/><path d="M4 20h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Inzicht</button>
 </nav>
 
@@ -842,6 +862,13 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     if (key === 'hours') return fmtHours(v);
     return fmt(v, m.d) + (m.unit && v != null ? ' ' + m.unit : '');
   };
+
+  // Drie doelen: hoe je het beleeft, wat op je inwerkt, en hoe je lichaam en energie reageren
+  const GROUPS = [
+    { id: 'beleving', label: 'Beleving', keys: ['happy', 'leven', 'wHappy', 'robin', 'vrienden'] },
+    { id: 'belasting', label: 'Belasting', keys: ['prive', 'wStress', 'workload', 'alcohol', 'drugs', 'mSlaap', 'mWakker', 'load', 'hours', 'atl', 'ctl'] },
+    { id: 'gevolgen', label: 'Gevolgen', keys: ['energie', 'mGevoel', 'hrv', 'rhr', 'unclenched', 'ziek', 'form'] },
+  ];
 
   // ================= Toestand =================
   let RAW = store.get(K.cache) || {};
@@ -1445,7 +1472,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   }
 
   // ================= Spreidingsdiagram (verkenner) =================
-  const EXPLORE = ['happy', 'energie', 'leven', 'prive', 'vrienden', 'robin', 'alcohol', 'drugs', 'ziek', 'mSlaap', 'mWakker', 'mGevoel', 'wHappy', 'wStress', 'unclenched', 'workload', 'hrv', 'rhr', 'load', 'hours', 'form'];
+  const EXPLORE = GROUPS.flatMap((g) => g.keys.filter((k) => k !== 'ctl'));
   function pairs(xk, yk, lag, days) {
     const out = [];
     for (const d of days) {
@@ -1480,12 +1507,16 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       const mk = (label, opts, value, onChange) => {
         const l = E('label', null, label, ctr);
         const s = E('select', null, null, l);
-        for (const [v, txt] of opts) { const o = E('option', null, txt, s); o.value = v; }
+        for (const [v, txt, grp] of opts) {
+          let parent = s;
+          if (grp) { parent = [...s.children].find((c) => c.label === grp) || E('optgroup', null, null, s); parent.label = grp; }
+          const o = E('option', null, txt, parent); o.value = v;
+        }
         s.value = String(value);
         s.addEventListener('change', () => { onChange(s.value); store.set(K.scatter, this.st); this.render(); });
         return s;
       };
-      const opts = EXPLORE.map((k) => [k, M[k].label]);
+      const opts = GROUPS.flatMap((g) => g.keys.filter((k) => EXPLORE.includes(k)).map((k) => [k, M[k].label, g.label]));
       mk('X', opts, st.x, (v) => { st.x = v; });
       mk('Y', opts, st.y, (v) => { st.y = v; });
       mk('', [['0', 'zelfde dag'], ['1', 'Y de dag erna']], st.lag, (v) => { st.lag = +v; });
@@ -1574,7 +1605,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   }
 
   // ================= Kalender-heatmap =================
-  const CAL_METRICS = ['happy', 'energie', 'leven', 'prive', 'mSlaap', 'wStress', 'hrv', 'load', 'hours', 'alcohol'];
+  const CAL_METRICS = ['happy', 'leven', 'prive', 'wStress', 'alcohol', 'mSlaap', 'load', 'hours', 'energie', 'hrv'];
   class CalendarChart {
     constructor(hostId) {
       const host = document.getElementById(hostId);
@@ -1672,9 +1703,12 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   }
 
   // ================= Tegels =================
-  const TILES = [
-    { key: 'happy' }, { key: 'energie' }, { key: 'prive' }, { key: 'wStress' },
-    { key: 'hrv' }, { key: 'rhr' }, { key: 'hours', total: true }, { key: 'load', total: true },
+  const TILE_GROUPS = [
+    { title: 'Beleving', note: 'Hoe je je dag en je leven beoordeelt', tiles: [{ key: 'happy' }, { key: 'leven' }, { key: 'wHappy' }, { key: 'robin' }] },
+    { title: 'Belasting', note: 'Wat op je inwerkt', tiles: [
+      { key: 'prive' }, { key: 'wStress' }, { key: 'workload' }, { key: 'alcohol', total: true },
+      { key: 'drugs', total: true }, { key: 'mSlaap' }, { key: 'mWakker' }, { key: 'load', total: true }] },
+    { title: 'Gevolgen', note: 'Hoe je lichaam en energie reageren', tiles: [{ key: 'energie' }, { key: 'mGevoel' }, { key: 'hrv' }, { key: 'rhr' }] },
   ];
   function periodStat(key, a, b, total) {
     const vs = eachDay(a, b).map((d) => val(key, d)).filter((v) => v != null);
@@ -1682,11 +1716,17 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     return total ? vs.reduce((s, v) => s + v, 0) : mean(vs);
   }
   function renderTiles() {
-    const box = $('#tiles');
-    box.textContent = '';
+    const root = $('#tiles');
+    root.textContent = '';
     const span = dayDiff(RANGE.start, RANGE.end) + 1;
     const prevEnd = addDays(RANGE.start, -1), prevStart = addDays(prevEnd, -(span - 1));
-    for (const t of TILES) {
+    for (const grp of TILE_GROUPS) {
+    const gEl = E('div', 'tile-group', null, root);
+    const gh = E('div', 'tile-group-head', null, gEl);
+    E('h3', null, grp.title, gh);
+    E('p', null, grp.note, gh);
+    const box = E('div', 'tiles', null, gEl);
+    for (const t of grp.tiles) {
       const m = M[t.key];
       const cur = periodStat(t.key, RANGE.start, RANGE.end, t.total);
       const prev = periodStat(t.key, prevStart, prevEnd, t.total);
@@ -1723,13 +1763,13 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       }
       // sparkline: dagwaarden (of 7-daags gem.) over de periode
       const days = rangeDays();
-      const pts = days.map((d) => (SMOOTH && !m.sum ? rolling(t.key, d) : val(t.key, d)));
+      const pts = days.map((d) => (SMOOTH && !t.total ? rolling(t.key, d) : val(t.key, d)));
       const sv = S('svg', { class: 'spark', viewBox: '0 0 100 34', preserveAspectRatio: 'none', 'aria-hidden': 'true' }, tile);
       const vs = pts.filter((v) => v != null);
       if (vs.length > 1) {
         const lo = Math.min(...vs), hi = Math.max(...vs);
         const X = (i) => (i / (days.length - 1)) * 100, Y = (v) => 30 - ((v - lo) / (hi - lo || 1)) * 26;
-        if (m.sum) {
+        if (t.total) {
           const w = Math.max(0.6, 100 / days.length - 0.8);
           pts.forEach((v, i) => { if (v) S('rect', { x: X(i) - w / 2, y: Y(v), width: w, height: 30 - Y(v) + 0.01, fill: 'var(--axis)', 'vector-effect': 'non-scaling-stroke' }, sv); });
         } else {
@@ -1739,6 +1779,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
           for (let i = pts.length - 1; i >= 0; i--) if (pts[i] != null) { S('circle', { cx: X(i), cy: Y(pts[i]), r: 2.6, fill: 'var(--accent)', 'vector-effect': 'non-scaling-stroke' }, sv); break; }
         }
       }
+    }
     }
     $('#overNote').textContent = `${rangeText()} · vergeleken met de ${span} dagen ervoor`;
   }
@@ -1750,6 +1791,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     ['workload', 'wStress', 0], ['hrv', 'energie', 0], ['alcohol', 'mSlaap', 1], ['drugs', 'hrv', 1], ['drugs', 'mSlaap', 1], ['drugs', 'happy', 1], ['mSlaap', 'energie', 0], ['mSlaap', 'hrv', 0],
     ['load', 'mSlaap', 1], ['wStress', 'mSlaap', 1], ['mWakker', 'happy', 0], ['ziek', 'happy', 0], ['unclenched', 'happy', 0], ['rhr', 'energie', 0],
     ['vrienden', 'happy', 0], ['vrienden', 'prive', 0], ['robin', 'happy', 0], ['robin', 'prive', 0], ['mSlaap', 'robin', 0],
+    ['prive', 'leven', 0], ['wStress', 'leven', 0], ['alcohol', 'leven', 1], ['workload', 'happy', 0], ['workload', 'unclenched', 0],
+    ['mWakker', 'energie', 0], ['mWakker', 'hrv', 0], ['mSlaap', 'mGevoel', 0], ['prive', 'mSlaap', 1], ['alcohol', 'rhr', 1], ['load', 'rhr', 1],
+    ['energie', 'happy', 0], ['hrv', 'happy', 0], ['mGevoel', 'happy', 0],
   ];
   function renderFindings() {
     const list = $('#findList');
@@ -1853,12 +1897,10 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       if (notes) E('p', 'quote', notes, g);
       if (extra) extra(g);
     };
-    group('Ochtend', ['mSlaap', 'mWakker', 'mGevoel'], r.morningNote);
-    group('Gevoel', ['happy', 'energie', 'leven', 'prive', 'vrienden', 'robin', 'ziek', 'alcohol', 'drugs'], r.note);
-    group('Werk', ['wHappy', 'wStress', 'unclenched', 'workload'], r.workNote);
-    group('Lichaam', ['hrv', 'rhr'], null);
     const acts = r.acts || [];
-    group('Training', acts.length ? ['hours', 'load', 'ctl', 'atl', 'form'] : ['ctl', 'atl', 'form'], null, acts.length ? (g) => {
+    group('Beleving', GROUPS[0].keys, null);
+    group('Belasting', ['prive', 'wStress', 'workload', 'alcohol', 'drugs', 'mSlaap', 'mWakker'], null);
+    group('Sport', acts.length ? ['hours', 'load', 'atl', 'ctl'] : ['atl', 'ctl'], null, acts.length ? (g) => {
       const ul = E('ul', 'acts', null, g);
       for (const a of acts) {
         const li = E('li', null, null, ul);
@@ -1866,6 +1908,11 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
         E('b', null, `${fmtHours((a.sec || 0) / 3600)}${a.load ? ' · ' + fmt(a.load, 0) : ''}`, li);
       }
     } : null);
+    group('Gevolgen', GROUPS[2].keys, null);
+    const notes = [['Dag', r.note], ['Werk', r.workNote], ['Ochtend', r.morningNote]].filter((n) => n[1]);
+    if (notes.length) group('Notities', [], null, (g) => {
+      for (const [tag, text] of notes) { const q = E('p', 'quote', null, g); E('span', 'note-tag', tag, q); q.append(text); }
+    });
     if (box.childElementCount <= 1) E('p', 'day-empty', 'Geen gegevens voor deze dag.', box);
   }
   function renderDayPanel(d) { if (isWide()) fillDay($('#dayPanel'), d); }
@@ -1890,44 +1937,54 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
 
   // ================= Grafieken aanmaken =================
   const L10 = { y: [1, 10], yTicks: [2, 4, 6, 8, 10] };
-  new TimeChart('c-gevoel', { id: 'gevoel', title: 'Gevoel', sub: 'Schaal 1–10', kind: 'line', smooth: true, height: () => (isTouchLayout() ? 200 : 260), ...L10,
-    series: [{ key: 'happy', label: 'Happiness', color: '--s1' }, { key: 'energie', label: 'Energie', color: '--s2' }, { key: 'leven', label: 'Levenscontentheid', color: '--s3' }] });
+  // Beleving
+  new TimeChart('c-beleving', { id: 'beleving', title: 'Happiness en levenscontentheid', sub: 'Uit Dagscore, schaal 1–10', kind: 'line', smooth: true, height: () => (isTouchLayout() ? 200 : 260), ...L10,
+    series: [{ key: 'happy', label: 'Happiness', color: '--s1' }, { key: 'leven', label: 'Levenscontentheid', color: '--s3' }] });
+  new TimeChart('c-wbeleving', { id: 'wbeleving', title: 'Happiness werk', sub: 'Uit Werkscore, schaal 1–10', kind: 'line', smooth: true, height: 180, ...L10, empty: 'Geen werkscores in deze periode',
+    series: [{ key: 'wHappy', label: 'Happiness werk', color: '--s1' }] });
+  new TimeChart('c-robin', { id: 'robin', title: 'Robin', sub: 'Hoe ik naar Robin was, 1–10', kind: 'line', smooth: true, height: 180, ...L10, empty: 'Nog geen scores voor Robin in deze periode',
+    series: [{ key: 'robin', label: 'Robin', color: '--s2' }] });
+  new TimeChart('c-vrienden', { id: 'vrienden', title: 'Vrienden', sub: 'Contact met vrienden, 0–3', kind: 'line', smooth: true, height: 180, y: [0, 3], yTicks: [0, 1, 2, 3], empty: 'Nog geen scores voor Vrienden in deze periode',
+    series: [{ key: 'vrienden', label: 'Vrienden', color: '--s3' }] });
+  // Belasting
   new TimeChart('c-stress', { id: 'stress', title: 'Stress', sub: 'Privé en werk, schaal 0–5', kind: 'line', smooth: true, height: 200, y: [0, 5], yTicks: [0, 1, 2, 3, 4, 5],
     series: [{ key: 'prive', label: 'Privéstress', color: '--s1' }, { key: 'wStress', label: 'Werkstress', color: '--s2' }] });
-  new TimeChart('c-werk', { id: 'werk', title: 'Werk', sub: 'Uit Werkscore, schaal 1–10 (stress staat hierboven)', kind: 'line', smooth: true, height: 200, ...L10,
-    series: [{ key: 'wHappy', label: 'Happiness', color: '--s1' }, { key: 'unclenched', label: 'Unclenched', color: '--s3' }, { key: 'workload', label: 'Workload', color: '--s4' }] });
-  new TimeChart('c-robin', { id: 'robin', title: 'Robin', sub: 'Hoe ik naar Robin was, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Nog geen scores voor Robin in deze periode',
-    series: [{ key: 'robin', label: 'Robin', color: '--s1' }] });
-  new TimeChart('c-vrienden', { id: 'vrienden', title: 'Vrienden', sub: 'Contact met vrienden, schaal 0–3', kind: 'line', smooth: true, height: 200, y: [0, 3], yTicks: [0, 1, 2, 3], empty: 'Nog geen scores voor Vrienden in deze periode',
-    series: [{ key: 'vrienden', label: 'Vrienden', color: '--s3' }] });
-  new TimeChart('c-strip', { id: 'strip', title: 'Ziek, alcohol en drugs', sub: 'Per dag; donkerder is meer', kind: 'strip', height: 116, zoom: true, empty: 'Geen gegevens in deze periode',
+  new TimeChart('c-workload', { id: 'workload', title: 'Workload', sub: 'Uit Werkscore, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Geen werkscores in deze periode',
+    series: [{ key: 'workload', label: 'Workload', color: '--s4' }] });
+  new TimeChart('c-middelen', { id: 'middelen', title: 'Alcohol en drugs', sub: 'Per dag; donkerder is meer', kind: 'strip', height: 92, zoom: true, empty: 'Geen gegevens in deze periode',
     series: [
-      { key: 'ziek', label: 'Ziek', ramp: ['--o1', '--o2', '--o3', '--o4'], level: (v) => (v <= 0 ? -1 : Math.min(3, v)) },
       { key: 'alcohol', label: 'Alcohol', ramp: ['--a1', '--a2', '--a3', '--a4', '--a5'], level: (v) => (v <= 0 ? -1 : Math.min(4, Math.ceil(v / 2) - 1)) },
       { key: 'drugs', label: 'Drugs', ramp: ['--o1', '--o2', '--o3', '--o4'], level: (v) => (v <= 0 ? -1 : Math.min(3, v)) },
     ],
     extra: (box) => {
       box.textContent = '';
       const lg = E('div', 'scale-legend', null, box);
-      E('span', null, 'Ziek en drugs 1', lg); for (const c of ['--o2', '--o3', '--o4']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '3', lg);
-      E('span', null, '·  Alcohol 1', lg).style.marginLeft = '8px'; for (const c of ['--a1', '--a2', '--a3', '--a4', '--a5']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '10', lg);
+      E('span', null, 'Alcohol 1', lg); for (const c of ['--a1', '--a2', '--a3', '--a4', '--a5']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '10', lg);
+      E('span', null, '·  Drugs 1', lg).style.marginLeft = '8px'; for (const c of ['--o2', '--o3', '--o4']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '3', lg);
     } });
-  new TimeChart('c-hrv', { id: 'hrv', title: 'HRV (rMSSD)', sub: 'Grijze band: jouw normale bereik (28 dagen, ± 1 sd)', kind: 'line', smooth: true, band: 'hrv', height: () => (isTouchLayout() ? 210 : 240), empty: 'Nog geen HRV-metingen. Staat er een export in Apps › HRV4Training?',
-    series: [{ key: 'hrv', label: 'HRV', color: '--s1' }] });
-  new TimeChart('c-ochtend', { id: 'ochtend', title: 'Ochtend', sub: 'Slaap en gevoel uit Ochtendscore, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Nog geen ochtendscores in deze periode',
-    series: [{ key: 'mSlaap', label: 'Slaap', color: '--s1' }, { key: 'mGevoel', label: 'Gevoel', color: '--s2' }] });
-  new TimeChart('c-wakker', { id: 'wakker', title: 'Wakker', sub: 'Uit Ochtendscore, schaal 0–4', kind: 'line', smooth: true, height: 200, y: [0, 4], yTicks: [0, 1, 2, 3, 4], empty: 'Nog geen ochtendscores in deze periode',
-    series: [{ key: 'mWakker', label: 'Wakker', color: '--s1' }] });
-  new TimeChart('c-rhr', { id: 'rhr', title: 'Rusthartslag', sub: 'Slagen per minuut, ochtendmeting', kind: 'line', smooth: true, height: 180, empty: 'Nog geen rusthartslag-metingen',
-    series: [{ key: 'rhr', label: 'Rusthartslag', color: '--s1' }] });
-  new TimeChart('c-load', { id: 'load', title: 'Belasting', subFn: (bs) => (bs[0] && bs[0].week ? 'Per week (som)' : 'Per dag, trainingsbelasting'), kind: 'bar', agg: 'auto', height: 200, empty: 'Geen trainingen in deze periode',
+  new TimeChart('c-slaap', { id: 'slaap', title: 'Slaap', sub: 'Hoe je sliep, uit Ochtendscore, 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Nog geen ochtendscores in deze periode',
+    series: [{ key: 'mSlaap', label: 'Slaap', color: '--s1' }] });
+  new TimeChart('c-wakker', { id: 'wakker', title: 'Wakker', sub: 'Wakker gelegen, uit Ochtendscore, 0–4', kind: 'line', smooth: true, height: 200, y: [0, 4], yTicks: [0, 1, 2, 3, 4], empty: 'Nog geen ochtendscores in deze periode',
+    series: [{ key: 'mWakker', label: 'Wakker', color: '--s2' }] });
+  new TimeChart('c-load', { id: 'load', title: 'Trainingsbelasting', subFn: (bs) => (bs[0] && bs[0].week ? 'Per week (som)' : 'Per dag'), kind: 'bar', agg: 'auto', height: 200, empty: 'Geen trainingen in deze periode',
     series: [{ key: 'load', label: 'Belasting', color: '--s1' }] });
   new TimeChart('c-hours', { id: 'hours', title: 'Trainingsuren', sub: 'Per week', kind: 'bar', agg: 'week', height: 200, empty: 'Geen trainingen in deze periode',
     series: [{ key: 'hours', label: 'Uren', color: '--s1' }] });
   new TimeChart('c-fit', { id: 'fit', title: 'Fitness en vermoeidheid', sub: 'Langetermijn- en kortetermijnbelasting', kind: 'line', height: 200, zero: true,
     series: [{ key: 'ctl', label: 'Fitness', color: '--s1' }, { key: 'atl', label: 'Vermoeidheid', color: '--s2' }] });
-  new TimeChart('c-form', { id: 'form', title: 'Vorm', sub: 'Fitness min vermoeidheid; boven nul = fris', kind: 'div', agg: 'none', height: 200,
+  // Gevolgen
+  new TimeChart('c-hrv', { id: 'hrv', title: 'HRV (rMSSD)', sub: 'Grijze band: jouw normale bereik (28 dagen, ± 1 sd)', kind: 'line', smooth: true, band: 'hrv', height: () => (isTouchLayout() ? 210 : 240), empty: 'Nog geen HRV-metingen. Staat er een export in Apps › HRV4Training?',
+    series: [{ key: 'hrv', label: 'HRV', color: '--s1' }] });
+  new TimeChart('c-energie', { id: 'energie', title: 'Energie en ochtendgevoel', sub: 'Energie uit Dagscore, gevoel uit Ochtendscore, 1–10', kind: 'line', smooth: true, height: 200, ...L10,
+    series: [{ key: 'energie', label: 'Energie', color: '--s2' }, { key: 'mGevoel', label: 'Ochtendgevoel', color: '--s3' }] });
+  new TimeChart('c-rhr', { id: 'rhr', title: 'Rusthartslag', sub: 'Slagen per minuut, ochtendmeting', kind: 'line', smooth: true, height: 180, empty: 'Nog geen rusthartslag-metingen',
+    series: [{ key: 'rhr', label: 'Rusthartslag', color: '--s1' }] });
+  new TimeChart('c-form', { id: 'form', title: 'Vorm', sub: 'Fitness min vermoeidheid; boven nul = fris', kind: 'div', agg: 'none', height: 180,
     series: [{ key: 'form', label: 'Vorm', color: '--s1' }] });
+  new TimeChart('c-unclenched', { id: 'unclenched', title: 'Unclenched', sub: 'Ontspannen op het werk, uit Werkscore, 1–10', kind: 'line', smooth: true, height: 180, ...L10, empty: 'Geen werkscores in deze periode',
+    series: [{ key: 'unclenched', label: 'Unclenched', color: '--s3' }] });
+  new TimeChart('c-ziek', { id: 'ziek', title: 'Ziek', sub: 'Per dag, 0–3', kind: 'bar', height: 180, y: [0, 3], yTicks: [0, 1, 2, 3], empty: 'Geen gegevens in deze periode',
+    series: [{ key: 'ziek', label: 'Ziek', color: '--s2' }] });
   const scatter = new ScatterChart('c-scatter');
   new CalendarChart('c-cal');
 
@@ -2146,7 +2203,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     for (const c of CHARTS) if (c.host.closest('.view') && c.host.closest('.view').dataset.view === name) c.render();
   }
   document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab)));
-  showTab(store.get(K.tab, 'overzicht'));
+  const OLD_TABS = { welzijn: 'beleving', lichaam: 'gevolgen', training: 'belasting' };
+  { const t = store.get(K.tab, 'overzicht'); showTab(OLD_TABS[t] || (document.getElementById(t) ? t : 'overzicht')); }
   const navLinks = [...document.querySelectorAll('.desk-nav a')];
   const io = new IntersectionObserver((entries) => {
     for (const en of entries) if (en.isIntersecting) navLinks.forEach((a) => a.classList.toggle('on', a.dataset.nav === en.target.id));
