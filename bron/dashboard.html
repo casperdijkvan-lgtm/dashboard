@@ -33,7 +33,7 @@
   --accent-soft: rgba(42, 120, 214, .12);
   --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
   --pos: #2a78d6; --neg: #e34948;
-  --good: #006300; --bad: #c23a3a;
+  --good: #006300; --bad: #c23a3a; --warn: #a86400;
   --band: rgba(137, 135, 129, .16);
   --raw-dot: .3;
   --q1: #cde2fb; --q2: #9ec5f4; --q3: #6da7ec; --q4: #3987e5; --q5: #256abf; --q6: #184f95; --q7: #0d366b;
@@ -52,7 +52,7 @@
     --accent: #3987e5; --accent-soft: rgba(57, 135, 229, .18);
     --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
     --pos: #3987e5; --neg: #e66767;
-    --good: #0ca30c; --bad: #ef6b6b;
+    --good: #0ca30c; --bad: #ef6b6b; --warn: #eda100;
     --band: rgba(195, 194, 183, .12);
     --q1: #104281; --q2: #184f95; --q3: #256abf; --q4: #3987e5; --q5: #6da7ec; --q6: #9ec5f4; --q7: #cde2fb;
     --o1: #5c2a13; --o2: #a8441c; --o3: #d95926; --o4: #f5a988;
@@ -68,7 +68,7 @@
   --accent: #3987e5; --accent-soft: rgba(57, 135, 229, .18);
   --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
   --pos: #3987e5; --neg: #e66767;
-  --good: #0ca30c; --bad: #ef6b6b;
+  --good: #0ca30c; --bad: #ef6b6b; --warn: #eda100;
   --band: rgba(195, 194, 183, .12);
   --q1: #104281; --q2: #184f95; --q3: #256abf; --q4: #3987e5; --q5: #6da7ec; --q6: #9ec5f4; --q7: #cde2fb;
   --o1: #5c2a13; --o2: #a8441c; --o3: #d95926; --o4: #f5a988;
@@ -250,6 +250,23 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 36px; }
 .sec-head { flex-wrap: wrap; }
 .tile svg.spark { width: 100%; height: 34px; margin-top: 6px; display: block; overflow: visible; }
 
+/* ---------- Klaar voor zwaar? ---------- */
+.ready-verdict { display: flex; gap: 12px; align-items: flex-start; margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: var(--card-2); }
+.ready-verdict b { display: block; font-size: 17px; font-weight: 650; }
+.ready-verdict p { margin: 2px 0 0; color: var(--ink-2); font-size: 13.5px; }
+.ready-verdict .dot { width: 14px; height: 14px; margin-top: 4px; }
+.ready-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }
+.ready-list li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--hair); cursor: pointer; }
+.ready-list li:hover .rl { color: var(--ink); }
+.ready-list .rl { font-size: 14px; color: var(--ink-2); }
+.ready-list .rl small { display: block; font-size: 12px; color: var(--muted); }
+.ready-list .rv { font-size: 14px; font-weight: 650; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--hair); }
+.dot.st-good { background: var(--good); }
+.dot.st-warn { background: var(--warn); }
+.dot.st-bad { background: var(--bad); }
+.dot.st-na { background: transparent; box-shadow: 0 0 0 1.5px var(--axis) inset; }
+
 /* ---------- Lijsten ---------- */
 .notes { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; }
 .notes li { padding: 10px 0; border-top: 1px solid var(--hair); display: grid; grid-template-columns: 72px 1fr; gap: 10px; cursor: pointer; }
@@ -387,6 +404,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   .sec-title { font-size: 28px; }
   .grid-2, .grid-3 { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .grp-title { margin: 6px 0 -2px; }
+  .ready-list { grid-template-columns: minmax(0, 1fr); }
   .span-2 { grid-column: auto; }
   .card { padding: 14px 14px 12px; border-radius: 18px; }
   .tiles { gap: 10px; }
@@ -463,6 +481,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
 
     <section class="view" id="overzicht" data-view="overzicht">
       <div class="sec-head"><h2 class="sec-title">Overzicht</h2><p class="sec-note" id="overNote"></p></div>
+      <div class="card" id="readyCard"><div class="card-head"><div class="card-titles"><h3>Klaar voor zwaar?</h3><p class="card-sub">Vandaag, vergeleken met je eigen normaal (28 dagen ervoor, ± 1 sd)</p></div></div><div id="readyVerdict"></div><ul class="ready-list" id="readyList"></ul></div>
       <div id="tiles"></div>
       <div class="grid-2">
         <div class="card" id="findCard"><div class="card-head"><div class="card-titles"><h3>Opvallend</h3><p class="card-sub">Samenhang in de gekozen periode, geen oorzaak</p></div></div><ul class="findings" id="findList"></ul></div>
@@ -1784,6 +1803,109 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     $('#overNote').textContent = `${rangeText()} · vergeleken met de ${span} dagen ervoor`;
   }
 
+  // ================= Klaar voor zwaar? =================
+  // Alleen signalen naast elkaar leggen: je eigen waarde tegenover je eigen normale bereik
+  // (baseline: 28 dagen ervoor, gemiddelde ± 1 sd) of een vaste grens. Er wordt niets omgerekend.
+  // Ochtendmetingen: vandaag, anders gisteren. Dagscores: de laatste van vandaag of gisteren.
+  const READY = [
+    { key: 'hrv', bandDir: 'low', name: 'HRV' },
+    { key: 'rhr', bandDir: 'high', name: 'Rusthartslag' },
+    { key: 'mSlaap', bandDir: 'low', bad: (v) => v <= 4, name: 'Slaap' },
+    { key: 'mWakker', bandDir: 'high', bad: (v) => v >= 3, name: 'Wakker gelegen' },
+    { key: 'mGevoel', bandDir: 'low', name: 'Ochtendgevoel' },
+    { key: 'form', fixed: (v) => (v < -30 ? 'bad' : v < -10 ? 'warn' : 'good'), note: (v) => (v < -30 ? 'erg vermoeid (onder −30)' : v < -10 ? 'zware periode (−10 tot −30)' : 'fris genoeg (boven −10)'), name: 'Vorm' },
+    { key: 'ramp', name: 'Opbouw fitness' },
+    { key: 'ziek', evening: true, fixed: (v) => (v > 0 ? 'bad' : 'good'), note: (v) => (v > 0 ? 'je gaf aan ziek te zijn' : 'niet ziek'), name: 'Ziek' },
+    { key: 'alcohol', evening: true, fixed: (v) => (v >= 6 ? 'bad' : v >= 3 ? 'warn' : 'good'), note: (v) => (v >= 3 ? '3 of meer' : 'minder dan 3'), name: 'Alcohol' },
+    { key: 'stress', evening: true, fixed: (v) => (v >= 4 ? 'warn' : 'good'), note: (v) => (v >= 4 ? 'hoog (4 of 5)' : 'niet hoog'), name: 'Stress' },
+  ];
+  const ST_WORD = { good: 'goed', warn: 'let op', bad: 'niet goed', na: 'geen gegevens' };
+  function readySignal(sg, today) {
+    const yest = addDays(today, -1);
+    const dayTag = (d) => (d === today ? '' : 'gisteren · ');
+    if (sg.key === 'ramp') {
+      const d = val('ctl', today) != null ? today : val('ctl', yest) != null ? yest : null;
+      const before = d && val('ctl', addDays(d, -7));
+      if (!d || before == null) return { st: 'na', d, value: '–', note: 'geen fitness uit intervals.icu' };
+      const ramp = val('ctl', d) - before;
+      const st = ramp > 8 ? 'warn' : 'good';
+      return { st, d, value: fmtSigned(ramp, 1) + ' /week', note: dayTag(d) + (st === 'warn' ? 'snelle opbouw (meer dan 8 per week)' : 'rustige opbouw (tot 8 per week)') };
+    }
+    if (sg.key === 'stress') {
+      const pick = (d) => { const a = val('prive', d), b = val('wStress', d); return a == null && b == null ? null : Math.max(a ?? 0, b ?? 0); };
+      const d = pick(today) != null ? today : pick(yest) != null ? yest : null;
+      if (!d) return { st: 'na', d: null, value: '–', note: 'geen stressscore gisteren of vandaag' };
+      const v = pick(d);
+      return { st: sg.fixed(v), d, value: fmt(v, 0) + ' van 5', note: dayTag(d) + 'hoogste van privé en werk · ' + sg.note(v) };
+    }
+    const d = val(sg.key, today) != null ? today : val(sg.key, yest) != null ? yest : null;
+    if (!d) return { st: 'na', d: null, value: '–', note: sg.evening ? 'geen dagscore gisteren of vandaag' : 'nog niet gemeten' };
+    const v = val(sg.key, d);
+    const value = fmtMetric(sg.key, v);
+    if (sg.fixed) return { st: sg.fixed(v), d, v, value, note: dayTag(d) + sg.note(v) };
+    // bij scores (1–10, 0–4) minstens een halve punt marge, zodat één halve punt verschil niet meteen telt
+    const band = (day) => { const b = baseline(sg.key, day); if (!b || M[sg.key].max == null) return b; return { ...b, lo: Math.min(b.lo, b.mu - 0.5), hi: Math.max(b.hi, b.mu + 0.5) }; };
+    const bl = band(d);
+    if (!bl) return { st: 'na', d, v, value, note: dayTag(d) + 'nog te weinig dagen voor je normaal' };
+    const out = (x, day) => { const b = day === d ? bl : band(day); return x != null && b && (sg.bandDir === 'low' ? x < b.lo : x > b.hi); };
+    const off = out(v, d);
+    const offTwice = off && out(val(sg.key, addDays(d, -1)), addDays(d, -1));
+    let st = off ? (offTwice ? 'bad' : 'warn') : 'good';
+    if (sg.bad && sg.bad(v)) st = 'bad';
+    const dd = M[sg.key].d;
+    let note = `normaal ${fmt(bl.lo, dd)}–${fmt(bl.hi, dd)}`;
+    if (off) note += offTwice ? (sg.bandDir === 'low' ? ' · 2 dagen eronder' : ' · 2 dagen erboven') : (sg.bandDir === 'low' ? ' · eronder' : ' · erboven');
+    return { st, d, v, value, note: dayTag(d) + note, off };
+  }
+  function renderReady() {
+    const today = todayISO();
+    const res = READY.map((sg) => ({ sg, ...readySignal(sg, today) }));
+    const known = res.filter((r) => r.st !== 'na');
+    const bad = res.filter((r) => r.st === 'bad'), warn = res.filter((r) => r.st === 'warn');
+    const box = $('#readyVerdict');
+    box.textContent = '';
+    const v = E('div', 'ready-verdict', null, box);
+    let st, title, text;
+    if (known.length < 3) {
+      st = 'na'; title = 'Nog te weinig metingen vandaag';
+      text = 'Doe je HRV-meting en vul Ochtendscore in; dan kleurt deze kaart.';
+    } else if (bad.length || warn.length >= 3) {
+      st = 'bad'; title = 'Liever rustig aan vandaag';
+    } else if (warn.length) {
+      st = 'warn'; title = 'Kan, maar let op';
+    } else {
+      st = 'good'; title = 'Groen licht voor zwaar';
+      text = `Alle ${known.length} signalen met gegevens zijn in orde.`;
+    }
+    if (!text) {
+      const names = [...bad, ...warn].map((r) => (/^[A-Z]{2}/.test(r.sg.name) ? r.sg.name : r.sg.name.toLowerCase()));
+      text = 'Let op: ' + names.join(', ') + '.';
+    }
+    const hrv = res.find((r) => r.sg.key === 'hrv'), rhr = res.find((r) => r.sg.key === 'rhr');
+    if (hrv.off && rhr.off && hrv.d === rhr.d) text += ' HRV laag en rusthartslag hoog tegelijk is vaak een vroeg teken van ziek worden.';
+    E('span', 'dot st-' + st, null, v).setAttribute('aria-hidden', 'true');
+    const t = E('div', null, null, v);
+    E('b', null, title, t);
+    E('p', null, text, t);
+    const list = $('#readyList');
+    list.textContent = '';
+    for (const r of res) {
+      const li = E('li', null, null, list);
+      const dot = E('span', 'dot st-' + r.st, null, li);
+      dot.setAttribute('role', 'img');
+      dot.setAttribute('aria-label', ST_WORD[r.st]);
+      const l = E('span', 'rl', r.sg.name, li);
+      E('small', null, r.note, l);
+      E('span', 'rv', r.value, li);
+      if (r.d) {
+        li.tabIndex = 0;
+        const go = () => selectDay(r.d, { open: !isWide() });
+        li.addEventListener('click', go);
+        li.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+      }
+    }
+  }
+
   // ================= Opvallend en notities =================
   const CANDIDATES = [
     ['alcohol', 'hrv', 1], ['alcohol', 'happy', 1], ['alcohol', 'energie', 1], ['load', 'hrv', 1], ['load', 'energie', 1],
@@ -1998,6 +2120,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     $('#resetZoom').hidden = RANGE.preset !== 'zoom';
     $('#zoomHint').hidden = RANGE.preset === 'zoom' || isTouchLayout();
     $('#smoothBtn').setAttribute('aria-pressed', String(SMOOTH));
+    renderReady();
     renderTiles();
     renderFindings();
     renderNoteList($('#noteList'), noteItems(rangeDays()).slice(0, 4), 'Geen notities in deze periode.');

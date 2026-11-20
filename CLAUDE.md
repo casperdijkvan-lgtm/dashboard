@@ -37,6 +37,22 @@ Het leest (alleen lezen, nooit schrijven):
   Overzicht, Beleving, Belasting, Gevolgen, Inzicht; `TILE_GROUPS` geeft de tegels per doel, het
   dagdetail en de Verkenner (optgroups) volgen `GROUPS`. Nieuwe metriek? Zet hem in `M`, in `GROUPS`
   en in een grafiek op het juiste tabblad.
+- `READY` / `renderReady()`: kaart **Klaar voor zwaar?** bovenaan het Overzicht. Altijd voor vandaag
+  (los van de gekozen periode). Ochtendmetingen van vandaag, anders gisteren; dagscores van vandaag of
+  gisteren. Per signaal groen/oranje/rood:
+  - HRV, rusthartslag, slaap, wakker en ochtendgevoel tegen de eigen band (28 dagen, ± 1 sd; bij
+    scores minstens ± 0,5). Buiten de band is oranje, 2 dagen op rij is rood. Slaap ≤ 4 en Wakker ≥ 3
+    zijn altijd rood.
+  - Vorm: onder −10 oranje, onder −30 rood.
+  - Opbouw fitness: CTL nu min 7 dagen terug; meer dan 8 is oranje.
+  - Ziek > 0 is rood.
+  - Alcohol: vanaf 3 oranje, vanaf 6 rood.
+  - Stress (hoogste van privé en werk): vanaf 4 oranje.
+
+  Oordeel: rood als er één rood signaal is of minstens 3 oranje, oranje bij 1–2 oranje, anders groen.
+  Bij minder dan 3 signalen met gegevens: "nog te weinig metingen". Zijn HRV laag en rusthartslag hoog
+  op dezelfde dag, dan komt er een extra regel over mogelijk ziek worden. De grenzen zijn een eerste
+  keuze en mogen worden bijgesteld.
 - `buildModel()`: zet de CSV's en metingen om naar één record per datum.
 - `TimeChart` (line/bar/div/strip, week/dag, crosshair, zoom, tabelweergave), `ScatterChart`
   (verbanden met vertraging), `CalendarChart` (heatmap). Tegels, bevindingen (Pearson r), dagboek,
