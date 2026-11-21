@@ -256,11 +256,18 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 36px; }
 .ready-verdict p { margin: 2px 0 0; color: var(--ink-2); font-size: 13.5px; }
 .ready-verdict .dot { width: 14px; height: 14px; margin-top: 4px; }
 .ready-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }
-.ready-list li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--hair); cursor: pointer; }
+.ready-list li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 5px 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--hair); cursor: pointer; }
 .ready-list li:hover .rl { color: var(--ink); }
 .ready-list .rl { font-size: 14px; color: var(--ink-2); }
 .ready-list .rl small { display: block; font-size: 12px; color: var(--muted); }
 .ready-list .rv { font-size: 14px; font-weight: 650; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.gauge { grid-column: 2 / -1; position: relative; height: 12px; margin: 0 6px; }
+.gauge i { position: absolute; top: 3px; height: 6px; border-radius: 3px; }
+.gauge .z-bad { background: var(--bad); }
+.gauge .z-warn { background: var(--warn); }
+.gauge .z-good { background: var(--good); }
+.gauge .z-na { background: var(--hair); }
+.gauge b { position: absolute; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 2px var(--card); transform: translateX(-50%); }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--hair); }
 .dot.st-good { background: var(--good); }
 .dot.st-warn { background: var(--warn); }
@@ -1807,17 +1814,17 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   // (baseline: 28 dagen ervoor, gemiddelde ± 1 sd) of een vaste grens. Er wordt niets omgerekend.
   // Ochtendmetingen: vandaag, anders gisteren. Dagscores: de laatste van vandaag of gisteren.
   const READY = [
-    { key: 'hrv', bandDir: 'low', name: 'HRV' },
-    { key: 'rhr', bandDir: 'high', name: 'Rusthartslag' },
-    { key: 'mSlaap', bandDir: 'low', bad: (v) => v <= 4, fallback: 8, unit: 'uur', name: 'Slaap' }, // uren; 8 uur tot er genoeg dagen zijn voor een eigen normaal
-    { key: 'mGevoel', bandDir: 'low', fallback: 7, name: 'Ochtendgevoel' }, // 7 tot er genoeg dagen zijn voor een eigen normaal
+    { key: 'hrv', bandDir: 'low', far: true, name: 'HRV' },
+    { key: 'rhr', bandDir: 'high', far: true, name: 'Rusthartslag' },
+    { key: 'mSlaap', bandDir: 'low', redAt: 4, fallback: 8, unit: 'uur', name: 'Slaap' }, // uren; 8 uur tot er genoeg dagen zijn voor een eigen normaal
+    { key: 'mGevoel', bandDir: 'low', redAt: 4, fallback: 7, name: 'Ochtendgevoel' }, // 7 tot er genoeg dagen zijn voor een eigen normaal
     // Vermoeidheid (ATL) verandert traag: 2 dagen boven de band zegt weinig, dus rood pas ruim erboven
-    { key: 'atl', bandDir: 'high', slow: true, empty: 'geen gegevens uit intervals.icu', name: 'Vermoeidheid' },
-    { key: 'form', fixed: (v) => (v < -30 ? 'bad' : v < -10 ? 'warn' : 'good'), note: (v) => (v < -30 ? 'erg vermoeid (onder −30)' : v < -10 ? 'zware periode (−10 tot −30)' : 'fris genoeg (boven −10)'), name: 'Vorm' },
-    { key: 'ramp', name: 'Opbouw fitness' },
-    { key: 'ziek', evening: true, fixed: (v) => (v > 0 ? 'bad' : 'good'), note: (v) => (v > 0 ? 'je gaf aan ziek te zijn' : 'niet ziek'), name: 'Ziek' },
-    { key: 'alcohol', evening: true, fixed: (v) => (v >= 6 ? 'bad' : v >= 3 ? 'warn' : 'good'), note: (v) => (v >= 3 ? '3 of meer' : 'minder dan 3'), name: 'Alcohol' },
-    { key: 'stress', evening: true, fixed: (v) => (v >= 8 ? 'bad' : v >= 5 ? 'warn' : 'good'), note: (v) => (v >= 8 ? 'erg hoog' : v >= 5 ? 'hoog' : 'niet hoog'), name: 'Stress' },
+    { key: 'atl', bandDir: 'high', far: true, slow: true, empty: 'geen gegevens uit intervals.icu', name: 'Vermoeidheid' },
+    { key: 'form', zones: { a: -50, b: 25, c1: -30, c2: -10, dir: 'low' }, fixed: (v) => (v < -30 ? 'bad' : v < -10 ? 'warn' : 'good'), note: (v) => (v < -30 ? 'erg vermoeid (onder −30)' : v < -10 ? 'zware periode (−10 tot −30)' : 'fris genoeg (boven −10)'), name: 'Vorm' },
+    { key: 'ramp', zones: { a: -4, b: 16, c1: 8, c2: 12, dir: 'high' }, name: 'Opbouw fitness' },
+    { key: 'ziek', evening: true, zones: { a: 0, b: 3, c1: 0.5, c2: 0.5, dir: 'high' }, fixed: (v) => (v > 0 ? 'bad' : 'good'), note: (v) => (v > 0 ? 'je gaf aan ziek te zijn' : 'niet ziek'), name: 'Ziek' },
+    { key: 'alcohol', evening: true, zones: { a: 0, b: 10, c1: 2.5, c2: 5.5, dir: 'high' }, fixed: (v) => (v >= 6 ? 'bad' : v >= 3 ? 'warn' : 'good'), note: (v) => (v >= 3 ? '3 of meer' : 'minder dan 3'), name: 'Alcohol' },
+    { key: 'stress', evening: true, zones: { a: 0, b: 10, c1: 4.5, c2: 7.5, dir: 'high' }, fixed: (v) => (v >= 8 ? 'bad' : v >= 5 ? 'warn' : 'good'), note: (v) => (v >= 8 ? 'erg hoog' : v >= 5 ? 'hoog' : 'niet hoog'), name: 'Stress' },
   ];
   const ST_WORD = { good: 'goed', warn: 'let op', bad: 'niet goed', na: 'geen gegevens' };
   function readySignal(sg, today) {
@@ -1828,8 +1835,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       const before = d && val('ctl', addDays(d, -7));
       if (!d || before == null) return { st: 'na', d, value: '–', note: 'geen fitness uit intervals.icu' };
       const ramp = val('ctl', d) - before;
-      const st = ramp > 8 ? 'warn' : 'good';
-      return { st, d, value: fmtSigned(ramp, 1) + ' /week', note: dayTag(d) + (st === 'warn' ? 'snelle opbouw (meer dan 8 per week)' : 'rustige opbouw (tot 8 per week)') };
+      const st = ramp > 12 ? 'bad' : ramp > 8 ? 'warn' : 'good';
+      return { st, d, value: fmtSigned(ramp, 1) + ' /week', gauge: { ...sg.zones, x: ramp }, note: dayTag(d) + (st === 'bad' ? 'erg snelle opbouw (meer dan 12 per week)' : st === 'warn' ? 'snelle opbouw (8 tot 12 per week)' : 'rustige opbouw (tot 8 per week)') };
     }
     if (sg.key === 'stress') {
       // Totaal van privé (0–5) en werk (0–5). Privé wordt elke dag ingevuld, werk alleen op werkdagen.
@@ -1839,14 +1846,14 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       const a = val('prive', d), b = val('wStress', d);
       const v = (a ?? 0) + (b ?? 0);
       const parts = a != null && b != null ? `privé ${fmt(a, 1)} + werk ${fmt(b, 1)}` : a != null ? 'alleen privé ingevuld' : 'alleen werk ingevuld';
-      return { st: sg.fixed(v), d, value: fmt(v, 1) + ' van 10', note: dayTag(d) + parts + ' · ' + sg.note(v) };
+      return { st: sg.fixed(v), d, value: fmt(v, 1) + ' van 10', gauge: { ...sg.zones, x: v }, note: dayTag(d) + parts + ' · ' + sg.note(v) };
     }
     const d = val(sg.key, today) != null ? today : val(sg.key, yest) != null ? yest : null;
     if (!d) return { st: 'na', d: null, value: '–', note: sg.empty || (sg.evening ? 'geen dagscore gisteren of vandaag' : 'nog niet gemeten') };
     const v = val(sg.key, d);
     const u = sg.unit ? ' ' + sg.unit : '';
     const value = fmtMetric(sg.key, v) + u;
-    if (sg.fixed) return { st: sg.fixed(v), d, v, value, note: dayTag(d) + sg.note(v) };
+    if (sg.fixed) return { st: sg.fixed(v), d, v, value, gauge: { ...sg.zones, x: v }, note: dayTag(d) + sg.note(v) };
     // bij scores (1–10, 0–4) minstens een halve punt marge, zodat één halve punt verschil niet meteen telt
     const band = (day) => { const b = baseline(sg.key, day) || (sg.fallback != null ? { mu: sg.fallback, lo: sg.fallback, hi: sg.fallback, provisional: true } : null); if (!b || M[sg.key].max == null) return b; return { ...b, lo: Math.min(b.lo, b.mu - 0.5), hi: Math.max(b.hi, b.mu + 0.5) }; };
     const bl = band(d);
@@ -1854,14 +1861,45 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     const out = (x, day) => { const b = day === d ? bl : band(day); return x != null && b && (sg.bandDir === 'low' ? x < b.lo : x > b.hi); };
     const off = out(v, d);
     const offTwice = off && out(val(sg.key, addDays(d, -1)), addDays(d, -1));
-    const farOff = sg.slow && v > bl.mu + 2 * (bl.hi - bl.mu);
-    let st = off ? ((sg.slow ? farOff : offTwice) ? 'bad' : 'warn') : 'good';
-    if (sg.bad && sg.bad(v)) st = 'bad';
+    const sd = bl.hi - bl.mu;
+    const farOff = !!sg.far && sd > 0 && (sg.bandDir === 'low' ? v < bl.mu - 2 * sd : v > bl.mu + 2 * sd);
+    let st = off ? (farOff || (!sg.slow && offTwice) ? 'bad' : 'warn') : 'good';
+    if (sg.redAt != null && v <= sg.redAt) st = 'bad';
+    // Balk: scores op hun eigen schaal (grens tussen twee halve punten), metingen rond je gemiddelde
+    let gauge;
+    if (sg.redAt != null) {
+      const c2 = Math.ceil(bl.lo * 2) / 2 - 0.25;
+      gauge = { a: M[sg.key].min, b: M[sg.key].max, c1: Math.min(sg.redAt + 0.25, c2), c2, dir: 'low', x: v };
+    } else {
+      const w = sd || 1;
+      gauge = sg.bandDir === 'low'
+        ? { a: bl.mu - 3.5 * w, b: bl.mu + 3.5 * w, c1: bl.mu - 2 * w, c2: bl.lo, dir: 'low', x: v }
+        : { a: bl.mu - 3.5 * w, b: bl.mu + 3.5 * w, c1: bl.hi, c2: bl.mu + 2 * w, dir: 'high', x: v };
+    }
     const dd = M[sg.key].d;
     let note = bl.provisional ? `voorlopig normaal ${fmt(bl.mu, dd)}${u}` : `normaal ${fmt(bl.lo, dd)}–${fmt(bl.hi, dd)}${u}`;
-    if (sg.slow) { if (off) note += farOff ? ' · ver erboven' : ' · erboven'; }
-    else if (off) note += offTwice ? (sg.bandDir === 'low' ? ' · 2 dagen eronder' : ' · 2 dagen erboven') : (sg.bandDir === 'low' ? ' · eronder' : ' · erboven');
-    return { st, d, v, value, note: dayTag(d) + note, off };
+    const side = sg.bandDir === 'low' ? 'eronder' : 'erboven';
+    if (off) note += farOff ? ` · ver ${side}` : !sg.slow && offTwice ? ` · 2 dagen ${side}` : ` · ${side}`;
+    return { st, d, v, value, gauge, note: dayTag(d) + note, off };
+  }
+  // Balk met rood, oranje en groen, en een punt op je waarde (buiten de balk: op de rand)
+  function drawGauge(li, r) {
+    const box = E('div', 'gauge', null, li);
+    box.setAttribute('role', 'img');
+    box.setAttribute('aria-label', `${r.sg.name}: ${r.value}, ${ST_WORD[r.st]}`);
+    const g = r.gauge;
+    if (!g) { const z = E('i', 'z-na', null, box); z.style.left = '0'; z.style.width = '100%'; return; }
+    const pct = (x) => ((Math.max(g.a, Math.min(g.b, x)) - g.a) / (g.b - g.a)) * 100;
+    const parts = g.dir === 'low'
+      ? [['bad', g.a, g.c1], ['warn', g.c1, g.c2], ['good', g.c2, g.b]]
+      : [['good', g.a, g.c1], ['warn', g.c1, g.c2], ['bad', g.c2, g.b]];
+    const shown = parts.filter(([, from, to]) => pct(to) > pct(from));
+    shown.forEach(([kind, from, to], i) => {
+      const z = E('i', 'z-' + kind, null, box);
+      z.style.left = pct(from) + '%';
+      z.style.width = i < shown.length - 1 ? `calc(${pct(to) - pct(from)}% - 2px)` : (pct(to) - pct(from)) + '%';
+    });
+    E('b', null, null, box).style.left = pct(g.x) + '%';
   }
   function renderReady() {
     const today = todayISO();
@@ -1903,6 +1941,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       const l = E('span', 'rl', r.sg.name, li);
       E('small', null, r.note, l);
       E('span', 'rv', r.value, li);
+      drawGauge(li, r);
       if (r.d) {
         li.tabIndex = 0;
         const go = () => selectDay(r.d, { open: !isWide() });

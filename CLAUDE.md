@@ -41,15 +41,15 @@ Het leest (alleen lezen, nooit schrijven):
   (los van de gekozen periode). Ochtendmetingen van vandaag, anders gisteren; dagscores van vandaag of
   gisteren. Per signaal groen/oranje/rood:
   - HRV, rusthartslag, slaap en ochtendgevoel tegen de eigen band (28 dagen, ± 1 sd; bij
-    scores minstens ± 0,5). Buiten de band is oranje, 2 dagen op rij is rood. Slaap ≤ 4 is altijd
-    rood.
+    scores minstens ± 0,5). Buiten de band is oranje, 2 dagen op rij is rood. HRV en rusthartslag ook
+    rood bij meer dan 2 sd van het gemiddelde; slaap en ochtendgevoel ook rood bij 4 of lager.
   - Slaap is in uren. Zolang er te weinig dagen zijn voor een eigen band (minder dan 10 metingen in
     28 dagen) geldt voorlopig 8 uur als normaal, dus onder 7,5 uur is oranje.
   - Ochtendgevoel: op dezelfde manier voorlopig 7 als normaal, dus onder 6,5 is oranje.
   - Vermoeidheid (ATL) tegen de eigen band: erboven oranje, meer dan 2 sd boven het gemiddelde rood.
     Geen regel "2 dagen op rij", want ATL verandert traag.
   - Vorm: onder −10 oranje, onder −30 rood.
-  - Opbouw fitness: CTL nu min 7 dagen terug; meer dan 8 is oranje.
+  - Opbouw fitness: CTL nu min 7 dagen terug; meer dan 8 is oranje, meer dan 12 rood.
   - Ziek > 0 is rood.
   - Alcohol: vanaf 3 oranje, vanaf 6 rood.
   - Stress (totaal van privé en werk, 0–10; op dagen zonder werkscore alleen privé): vanaf 5 oranje,
@@ -59,6 +59,10 @@ Het leest (alleen lezen, nooit schrijven):
   Bij minder dan 3 signalen met gegevens: "nog te weinig metingen". Zijn HRV laag en rusthartslag hoog
   op dezelfde dag, dan komt er een extra regel over mogelijk ziek worden. De grenzen zijn een eerste
   keuze en mogen worden bijgesteld.
+
+  Elk signaal heeft een balk (`drawGauge`) met rood, oranje en groen en een punt op de waarde. De zones
+  zijn dezelfde grenzen als hierboven. Ziek heeft bewust geen oranje. Bij "2 dagen op rij" kan het
+  rode statusbolletje bij een punt in de oranje zone staan.
 - `buildModel()`: zet de CSV's en metingen om naar één record per datum.
 - `TimeChart` (line/bar/div/strip, week/dag, crosshair, zoom, tabelweergave), `ScatterChart`
   (verbanden met vertraging), `CalendarChart` (heatmap). Tegels, bevindingen (Pearson r), dagboek,
