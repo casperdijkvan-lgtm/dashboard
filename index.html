@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="30292b54bd">
+<meta name="dashboard-versie" content="2e9c1bf492">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -502,11 +502,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
 
     <section class="view" id="belasting" data-view="belasting">
       <div class="sec-head"><h2 class="sec-title">Belasting</h2><p class="sec-note">Wat op je inwerkt</p></div>
-      <h3 class="grp-title">Stress en werk</h3>
-      <div class="grid-2">
-        <div id="c-stress"></div>
-        <div id="c-workload"></div>
-      </div>
+      <h3 class="grp-title">Stress</h3>
+      <div id="c-stress"></div>
       <h3 class="grp-title">Alcohol en drugs</h3>
       <div id="c-middelen"></div>
       <h3 class="grp-title">Slaap</h3>
@@ -864,7 +861,6 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     wHappy: { label: 'Happiness werk', short: 'Happy', src: 'work', col: 'Happiness', oldCol: 'Happyness', min: 1, max: 10, good: 'up', d: 1 },
     wStress: { label: 'Werkstress', short: 'Stress', src: 'work', col: 'Stress', min: 0, max: 5, good: 'down', zero: 'after-first', d: 1 },
     unclenched: { label: 'Unclenched', src: 'work', col: 'Unclenched', min: 1, max: 10, good: 'up', d: 1 },
-    workload: { label: 'Workload', src: 'work', col: 'Workload', min: 1, max: 10, good: null, d: 1 },
     mSlaap: { label: 'Slaap', src: 'morning', col: 'Slaap', min: 1, max: 10, good: 'up', d: 1 },
     mWakker: { label: 'Wakker', src: 'morning', col: 'Wakker', min: 0, max: 4, zero: true, good: null, d: 1 },
     mGevoel: { label: 'Ochtendgevoel', short: 'Gevoel', src: 'morning', col: 'Gevoel', min: 1, max: 10, good: 'up', d: 1 },
@@ -885,7 +881,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   // Drie doelen: hoe je het beleeft, wat op je inwerkt, en hoe je lichaam en energie reageren
   const GROUPS = [
     { id: 'beleving', label: 'Beleving', keys: ['happy', 'leven', 'wHappy', 'robin', 'vrienden'] },
-    { id: 'belasting', label: 'Belasting', keys: ['prive', 'wStress', 'workload', 'alcohol', 'drugs', 'mSlaap', 'mWakker', 'load', 'hours', 'atl', 'ctl'] },
+    { id: 'belasting', label: 'Belasting', keys: ['prive', 'wStress', 'alcohol', 'drugs', 'mSlaap', 'mWakker', 'load', 'hours', 'atl', 'ctl'] },
     { id: 'gevolgen', label: 'Gevolgen', keys: ['energie', 'mGevoel', 'hrv', 'rhr', 'unclenched', 'ziek', 'form'] },
   ];
 
@@ -1517,6 +1513,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       host.classList.add('card');
       this.host = host;
       const st = store.get(K.scatter, { x: 'alcohol', y: 'hrv', lag: 1 });
+      // een bewaarde keuze kan een meetwaarde zijn die niet meer bestaat
+      if (!EXPLORE.includes(st.x)) st.x = 'alcohol';
+      if (!EXPLORE.includes(st.y)) st.y = 'hrv';
       this.st = st;
       const head = E('div', 'card-head', null, host);
       const t = E('div', 'card-titles', null, head);
@@ -1725,8 +1724,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   const TILE_GROUPS = [
     { title: 'Beleving', note: 'Hoe je je dag en je leven beoordeelt', tiles: [{ key: 'happy' }, { key: 'leven' }, { key: 'wHappy' }, { key: 'robin' }] },
     { title: 'Belasting', note: 'Wat op je inwerkt', tiles: [
-      { key: 'prive' }, { key: 'wStress' }, { key: 'workload' }, { key: 'alcohol', total: true },
-      { key: 'drugs', total: true }, { key: 'mSlaap' }, { key: 'mWakker' }, { key: 'load', total: true }] },
+      { key: 'prive' }, { key: 'wStress' }, { key: 'alcohol', total: true }, { key: 'drugs', total: true },
+      { key: 'mSlaap' }, { key: 'mWakker' }, { key: 'load', total: true }, { key: 'atl' }] },
     { title: 'Gevolgen', note: 'Hoe je lichaam en energie reageren', tiles: [{ key: 'energie' }, { key: 'mGevoel' }, { key: 'hrv' }, { key: 'rhr' }] },
   ];
   function periodStat(key, a, b, total) {
@@ -1811,8 +1810,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     { key: 'hrv', bandDir: 'low', name: 'HRV' },
     { key: 'rhr', bandDir: 'high', name: 'Rusthartslag' },
     { key: 'mSlaap', bandDir: 'low', bad: (v) => v <= 4, fallback: 8, unit: 'uur', name: 'Slaap' }, // uren; 8 uur tot er genoeg dagen zijn voor een eigen normaal
-    { key: 'mWakker', bandDir: 'high', bad: (v) => v >= 3, name: 'Wakker gelegen' },
     { key: 'mGevoel', bandDir: 'low', fallback: 7, name: 'Ochtendgevoel' }, // 7 tot er genoeg dagen zijn voor een eigen normaal
+    // Vermoeidheid (ATL) verandert traag: 2 dagen boven de band zegt weinig, dus rood pas ruim erboven
+    { key: 'atl', bandDir: 'high', slow: true, empty: 'geen gegevens uit intervals.icu', name: 'Vermoeidheid' },
     { key: 'form', fixed: (v) => (v < -30 ? 'bad' : v < -10 ? 'warn' : 'good'), note: (v) => (v < -30 ? 'erg vermoeid (onder −30)' : v < -10 ? 'zware periode (−10 tot −30)' : 'fris genoeg (boven −10)'), name: 'Vorm' },
     { key: 'ramp', name: 'Opbouw fitness' },
     { key: 'ziek', evening: true, fixed: (v) => (v > 0 ? 'bad' : 'good'), note: (v) => (v > 0 ? 'je gaf aan ziek te zijn' : 'niet ziek'), name: 'Ziek' },
@@ -1842,7 +1842,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       return { st: sg.fixed(v), d, value: fmt(v, 1) + ' van 10', note: dayTag(d) + parts + ' · ' + sg.note(v) };
     }
     const d = val(sg.key, today) != null ? today : val(sg.key, yest) != null ? yest : null;
-    if (!d) return { st: 'na', d: null, value: '–', note: sg.evening ? 'geen dagscore gisteren of vandaag' : 'nog niet gemeten' };
+    if (!d) return { st: 'na', d: null, value: '–', note: sg.empty || (sg.evening ? 'geen dagscore gisteren of vandaag' : 'nog niet gemeten') };
     const v = val(sg.key, d);
     const u = sg.unit ? ' ' + sg.unit : '';
     const value = fmtMetric(sg.key, v) + u;
@@ -1854,11 +1854,13 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     const out = (x, day) => { const b = day === d ? bl : band(day); return x != null && b && (sg.bandDir === 'low' ? x < b.lo : x > b.hi); };
     const off = out(v, d);
     const offTwice = off && out(val(sg.key, addDays(d, -1)), addDays(d, -1));
-    let st = off ? (offTwice ? 'bad' : 'warn') : 'good';
+    const farOff = sg.slow && v > bl.mu + 2 * (bl.hi - bl.mu);
+    let st = off ? ((sg.slow ? farOff : offTwice) ? 'bad' : 'warn') : 'good';
     if (sg.bad && sg.bad(v)) st = 'bad';
     const dd = M[sg.key].d;
     let note = bl.provisional ? `voorlopig normaal ${fmt(bl.mu, dd)}${u}` : `normaal ${fmt(bl.lo, dd)}–${fmt(bl.hi, dd)}${u}`;
-    if (off) note += offTwice ? (sg.bandDir === 'low' ? ' · 2 dagen eronder' : ' · 2 dagen erboven') : (sg.bandDir === 'low' ? ' · eronder' : ' · erboven');
+    if (sg.slow) { if (off) note += farOff ? ' · ver erboven' : ' · erboven'; }
+    else if (off) note += offTwice ? (sg.bandDir === 'low' ? ' · 2 dagen eronder' : ' · 2 dagen erboven') : (sg.bandDir === 'low' ? ' · eronder' : ' · erboven');
     return { st, d, v, value, note: dayTag(d) + note, off };
   }
   function renderReady() {
@@ -1914,10 +1916,10 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   const CANDIDATES = [
     ['alcohol', 'hrv', 1], ['alcohol', 'happy', 1], ['alcohol', 'energie', 1], ['load', 'hrv', 1], ['load', 'energie', 1],
     ['hours', 'happy', 0], ['wStress', 'hrv', 1], ['wStress', 'happy', 0], ['prive', 'happy', 0], ['prive', 'hrv', 1],
-    ['workload', 'wStress', 0], ['hrv', 'energie', 0], ['alcohol', 'mSlaap', 1], ['drugs', 'hrv', 1], ['drugs', 'mSlaap', 1], ['drugs', 'happy', 1], ['mSlaap', 'energie', 0], ['mSlaap', 'hrv', 0],
+    ['hrv', 'energie', 0], ['alcohol', 'mSlaap', 1], ['drugs', 'hrv', 1], ['drugs', 'mSlaap', 1], ['drugs', 'happy', 1], ['mSlaap', 'energie', 0], ['mSlaap', 'hrv', 0],
     ['load', 'mSlaap', 1], ['wStress', 'mSlaap', 1], ['mWakker', 'happy', 0], ['ziek', 'happy', 0], ['unclenched', 'happy', 0], ['rhr', 'energie', 0],
     ['vrienden', 'happy', 0], ['vrienden', 'prive', 0], ['robin', 'happy', 0], ['robin', 'prive', 0], ['mSlaap', 'robin', 0],
-    ['prive', 'leven', 0], ['wStress', 'leven', 0], ['alcohol', 'leven', 1], ['workload', 'happy', 0], ['workload', 'unclenched', 0],
+    ['prive', 'leven', 0], ['wStress', 'leven', 0], ['alcohol', 'leven', 1], 
     ['mWakker', 'energie', 0], ['mWakker', 'hrv', 0], ['mSlaap', 'mGevoel', 0], ['prive', 'mSlaap', 1], ['alcohol', 'rhr', 1], ['load', 'rhr', 1],
     ['energie', 'happy', 0], ['hrv', 'happy', 0], ['mGevoel', 'happy', 0],
   ];
@@ -2025,7 +2027,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     };
     const acts = r.acts || [];
     group('Beleving', GROUPS[0].keys, null);
-    group('Belasting', ['prive', 'wStress', 'workload', 'alcohol', 'drugs', 'mSlaap', 'mWakker'], null);
+    group('Belasting', ['prive', 'wStress', 'alcohol', 'drugs', 'mSlaap', 'mWakker'], null);
     group('Sport', acts.length ? ['hours', 'load', 'atl', 'ctl'] : ['atl', 'ctl'], null, acts.length ? (g) => {
       const ul = E('ul', 'acts', null, g);
       for (const a of acts) {
@@ -2075,8 +2077,6 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   // Belasting
   new TimeChart('c-stress', { id: 'stress', title: 'Stress', sub: 'Privé en werk, schaal 0–5', kind: 'line', smooth: true, height: 200, y: [0, 5], yTicks: [0, 1, 2, 3, 4, 5],
     series: [{ key: 'prive', label: 'Privéstress', color: '--s1' }, { key: 'wStress', label: 'Werkstress', color: '--s2' }] });
-  new TimeChart('c-workload', { id: 'workload', title: 'Workload', sub: 'Uit Werkscore, schaal 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Geen werkscores in deze periode',
-    series: [{ key: 'workload', label: 'Workload', color: '--s4' }] });
   new TimeChart('c-middelen', { id: 'middelen', title: 'Alcohol en drugs', sub: 'Per dag; donkerder is meer', kind: 'strip', height: 92, zoom: true, empty: 'Geen gegevens in deze periode',
     series: [
       { key: 'alcohol', label: 'Alcohol', ramp: ['--a1', '--a2', '--a3', '--a4', '--a5'], level: (v) => (v <= 0 ? -1 : Math.min(4, Math.ceil(v / 2) - 1)) },

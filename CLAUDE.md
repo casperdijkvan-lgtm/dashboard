@@ -31,7 +31,7 @@ Het leest (alleen lezen, nooit schrijven):
   `zero: true` als 0 een echte waarde is, `zero: 'after-first'` als nullen vóór de eerste ingevulde dag
   "nog niet gevraagd" betekenen).
 - `GROUPS`: de drie doelen waarop het dashboard is ingedeeld. **Beleving** (Happiness,
-  Levenscontentheid, Happiness werk, Robin, Vrienden), **Belasting** (privé- en werkstress, workload,
+  Levenscontentheid, Happiness werk, Robin, Vrienden), **Belasting** (privé- en werkstress,
   alcohol, drugs, slaap, wakker, trainingsbelasting/-uren, vermoeidheid, fitness) en **Gevolgen**
   (energie, ochtendgevoel, HRV, rusthartslag, unclenched, ziek, vorm). De tabbladen/secties heten
   Overzicht, Beleving, Belasting, Gevolgen, Inzicht; `TILE_GROUPS` geeft de tegels per doel, het
@@ -40,12 +40,14 @@ Het leest (alleen lezen, nooit schrijven):
 - `READY` / `renderReady()`: kaart **Klaar voor zwaar?** bovenaan het Overzicht. Altijd voor vandaag
   (los van de gekozen periode). Ochtendmetingen van vandaag, anders gisteren; dagscores van vandaag of
   gisteren. Per signaal groen/oranje/rood:
-  - HRV, rusthartslag, slaap, wakker en ochtendgevoel tegen de eigen band (28 dagen, ± 1 sd; bij
-    scores minstens ± 0,5). Buiten de band is oranje, 2 dagen op rij is rood. Slaap ≤ 4 en Wakker ≥ 3
-    zijn altijd rood.
+  - HRV, rusthartslag, slaap en ochtendgevoel tegen de eigen band (28 dagen, ± 1 sd; bij
+    scores minstens ± 0,5). Buiten de band is oranje, 2 dagen op rij is rood. Slaap ≤ 4 is altijd
+    rood.
   - Slaap is in uren. Zolang er te weinig dagen zijn voor een eigen band (minder dan 10 metingen in
     28 dagen) geldt voorlopig 8 uur als normaal, dus onder 7,5 uur is oranje.
   - Ochtendgevoel: op dezelfde manier voorlopig 7 als normaal, dus onder 6,5 is oranje.
+  - Vermoeidheid (ATL) tegen de eigen band: erboven oranje, meer dan 2 sd boven het gemiddelde rood.
+    Geen regel "2 dagen op rij", want ATL verandert traag.
   - Vorm: onder −10 oranje, onder −30 rood.
   - Opbouw fitness: CTL nu min 7 dagen terug; meer dan 8 is oranje.
   - Ziek > 0 is rood.
@@ -70,7 +72,7 @@ niet, pas dan de bestanden aan (via een eenmalige omzetting in de score-apps), n
 
 Kolomnamen en schalen moeten overeenkomen met de vragen in `casperdijkvan-lgtm/dagscore`
 (`bron/dagscore.html` en `bron/build_site.py`). Huidige schalen: Happiness/Energie/Levenscontentheid/
-Unclenched/Workload/Slaap/Gevoel/Robin 1–10, Privestress en werk-Stress 0–5, Ziek, Drugs en Vrienden 0–3, Alcohol 0–10,
+Unclenched/Slaap/Gevoel/Robin 1–10, Privestress en werk-Stress 0–5, Ziek, Drugs en Vrienden 0–3, Alcohol 0–10,
 Wakker 0–4 (halve punten). Verandert daar iets, pas dan `M` en de grafieken hier aan.
 
 ## Wensen van de gebruiker
