@@ -1817,7 +1817,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     { key: 'ramp', name: 'Opbouw fitness' },
     { key: 'ziek', evening: true, fixed: (v) => (v > 0 ? 'bad' : 'good'), note: (v) => (v > 0 ? 'je gaf aan ziek te zijn' : 'niet ziek'), name: 'Ziek' },
     { key: 'alcohol', evening: true, fixed: (v) => (v >= 6 ? 'bad' : v >= 3 ? 'warn' : 'good'), note: (v) => (v >= 3 ? '3 of meer' : 'minder dan 3'), name: 'Alcohol' },
-    { key: 'stress', evening: true, fixed: (v) => (v >= 4 ? 'warn' : 'good'), note: (v) => (v >= 4 ? 'hoog (4 of 5)' : 'niet hoog'), name: 'Stress' },
+    { key: 'stress', evening: true, fixed: (v) => (v >= 8 ? 'bad' : v >= 5 ? 'warn' : 'good'), note: (v) => (v >= 8 ? 'erg hoog' : v >= 5 ? 'hoog' : 'niet hoog'), name: 'Stress' },
   ];
   const ST_WORD = { good: 'goed', warn: 'let op', bad: 'niet goed', na: 'geen gegevens' };
   function readySignal(sg, today) {
@@ -1832,11 +1832,14 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       return { st, d, value: fmtSigned(ramp, 1) + ' /week', note: dayTag(d) + (st === 'warn' ? 'snelle opbouw (meer dan 8 per week)' : 'rustige opbouw (tot 8 per week)') };
     }
     if (sg.key === 'stress') {
-      const pick = (d) => { const a = val('prive', d), b = val('wStress', d); return a == null && b == null ? null : Math.max(a ?? 0, b ?? 0); };
-      const d = pick(today) != null ? today : pick(yest) != null ? yest : null;
+      // Totaal van privé (0–5) en werk (0–5). Privé wordt elke dag ingevuld, werk alleen op werkdagen.
+      const has = (k, x) => val(k, x) != null;
+      const d = has('prive', today) ? today : has('prive', yest) ? yest : has('wStress', today) ? today : has('wStress', yest) ? yest : null;
       if (!d) return { st: 'na', d: null, value: '–', note: 'geen stressscore gisteren of vandaag' };
-      const v = pick(d);
-      return { st: sg.fixed(v), d, value: fmt(v, 0) + ' van 5', note: dayTag(d) + 'hoogste van privé en werk · ' + sg.note(v) };
+      const a = val('prive', d), b = val('wStress', d);
+      const v = (a ?? 0) + (b ?? 0);
+      const parts = a != null && b != null ? `privé ${fmt(a, 1)} + werk ${fmt(b, 1)}` : a != null ? 'alleen privé ingevuld' : 'alleen werk ingevuld';
+      return { st: sg.fixed(v), d, value: fmt(v, 1) + ' van 10', note: dayTag(d) + parts + ' · ' + sg.note(v) };
     }
     const d = val(sg.key, today) != null ? today : val(sg.key, yest) != null ? yest : null;
     if (!d) return { st: 'na', d: null, value: '–', note: sg.evening ? 'geen dagscore gisteren of vandaag' : 'nog niet gemeten' };

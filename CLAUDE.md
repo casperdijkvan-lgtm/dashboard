@@ -47,7 +47,8 @@ Het leest (alleen lezen, nooit schrijven):
   - Opbouw fitness: CTL nu min 7 dagen terug; meer dan 8 is oranje.
   - Ziek > 0 is rood.
   - Alcohol: vanaf 3 oranje, vanaf 6 rood.
-  - Stress (hoogste van privé en werk): vanaf 4 oranje.
+  - Stress (totaal van privé en werk, 0–10; op dagen zonder werkscore alleen privé): vanaf 5 oranje,
+    vanaf 8 rood.
 
   Oordeel: rood als er één rood signaal is of minstens 3 oranje, oranje bij 1–2 oranje, anders groen.
   Bij minder dan 3 signalen met gegevens: "nog te weinig metingen". Zijn HRV laag en rusthartslag hoog
