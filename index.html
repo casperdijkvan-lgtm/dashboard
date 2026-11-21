@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="f0991306cf">
+<meta name="dashboard-versie" content="5359a66800">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -252,7 +252,8 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 36px; }
 
 /* ---------- Klaar voor zwaar? ---------- */
 .ready-verdict { display: flex; gap: 12px; align-items: flex-start; margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: var(--card-2); }
-.ready-verdict b { display: block; font-size: 17px; font-weight: 650; }
+.ready-verdict > div { flex: 1; min-width: 0; }
+.ready-verdict .verdict-title { display: block; font-size: 17px; font-weight: 650; }
 .ready-verdict p { margin: 2px 0 0; color: var(--ink-2); font-size: 13.5px; }
 .ready-verdict .dot { width: 14px; height: 14px; margin-top: 4px; }
 .ready-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }
@@ -268,6 +269,9 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 36px; }
 .gauge .z-good { background: var(--good); }
 .gauge .z-na { background: var(--hair); }
 .gauge b { position: absolute; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 2px var(--card); transform: translateX(-50%); }
+.ready-verdict .gauge { height: 16px; margin: 10px 8px 2px; }
+.ready-verdict .gauge i { top: 4px; height: 8px; border-radius: 4px; }
+.ready-verdict .gauge b { width: 16px; height: 16px; box-shadow: 0 0 0 2px var(--card-2); }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--hair); }
 .dot.st-good { background: var(--good); }
 .dot.st-warn { background: var(--warn); }
@@ -1929,8 +1933,12 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     if (hrv.off && rhr.off && hrv.d === rhr.d) text += ' HRV laag en rusthartslag hoog tegelijk is vaak een vroeg teken van ziek worden.';
     E('span', 'dot st-' + st, null, v).setAttribute('aria-hidden', 'true');
     const t = E('div', null, null, v);
-    E('b', null, title, t);
+    E('b', 'verdict-title', title, t);
     E('p', null, text, t);
+    // Oordeel als balk: oranje telt 1, rood telt 3. 0 = groen, 1–2 = oranje, 3 of meer = rood (zelfde regel als hierboven)
+    const pts = warn.length + 3 * bad.length;
+    const pos = pts === 0 ? 5 / 6 : pts === 1 ? 0.6 : pts === 2 ? 0.4 : Math.max(0.03, 0.29 - (pts - 3) * 0.04);
+    drawGauge(t, { sg: { name: 'Oordeel' }, st, value: title, gauge: st === 'na' ? null : { a: 0, b: 1, c1: 1 / 3, c2: 2 / 3, dir: 'low', x: pos } });
     const list = $('#readyList');
     list.textContent = '';
     for (const r of res) {

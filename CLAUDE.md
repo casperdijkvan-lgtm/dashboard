@@ -63,6 +63,8 @@ Het leest (alleen lezen, nooit schrijven):
   Elk signaal heeft een balk (`drawGauge`) met rood, oranje en groen en een punt op de waarde. De zones
   zijn dezelfde grenzen als hierboven. Ziek heeft bewust geen oranje. Bij "2 dagen op rij" kan het
   rode statusbolletje bij een punt in de oranje zone staan.
+  Ook het oordeel heeft zo'n balk: oranje telt 1 punt, rood 3. 0 punten is groen, 1–2 oranje, 3 of meer
+  rood; hoe meer punten, hoe verder de punt naar links.
 - `buildModel()`: zet de CSV's en metingen om naar één record per datum.
 - `TimeChart` (line/bar/div/strip, week/dag, crosshair, zoom, tabelweergave), `ScatterChart`
   (verbanden met vertraging), `CalendarChart` (heatmap). Tegels, bevindingen (Pearson r), dagboek,
