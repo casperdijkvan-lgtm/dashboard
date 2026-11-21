@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="61c32e1cf5">
+<meta name="dashboard-versie" content="30292b54bd">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -1812,7 +1812,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     { key: 'rhr', bandDir: 'high', name: 'Rusthartslag' },
     { key: 'mSlaap', bandDir: 'low', bad: (v) => v <= 4, fallback: 8, unit: 'uur', name: 'Slaap' }, // uren; 8 uur tot er genoeg dagen zijn voor een eigen normaal
     { key: 'mWakker', bandDir: 'high', bad: (v) => v >= 3, name: 'Wakker gelegen' },
-    { key: 'mGevoel', bandDir: 'low', name: 'Ochtendgevoel' },
+    { key: 'mGevoel', bandDir: 'low', fallback: 7, name: 'Ochtendgevoel' }, // 7 tot er genoeg dagen zijn voor een eigen normaal
     { key: 'form', fixed: (v) => (v < -30 ? 'bad' : v < -10 ? 'warn' : 'good'), note: (v) => (v < -30 ? 'erg vermoeid (onder −30)' : v < -10 ? 'zware periode (−10 tot −30)' : 'fris genoeg (boven −10)'), name: 'Vorm' },
     { key: 'ramp', name: 'Opbouw fitness' },
     { key: 'ziek', evening: true, fixed: (v) => (v > 0 ? 'bad' : 'good'), note: (v) => (v > 0 ? 'je gaf aan ziek te zijn' : 'niet ziek'), name: 'Ziek' },

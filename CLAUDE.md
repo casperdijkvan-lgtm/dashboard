@@ -45,6 +45,7 @@ Het leest (alleen lezen, nooit schrijven):
     zijn altijd rood.
   - Slaap is in uren. Zolang er te weinig dagen zijn voor een eigen band (minder dan 10 metingen in
     28 dagen) geldt voorlopig 8 uur als normaal, dus onder 7,5 uur is oranje.
+  - Ochtendgevoel: op dezelfde manier voorlopig 7 als normaal, dus onder 6,5 is oranje.
   - Vorm: onder −10 oranje, onder −30 rood.
   - Opbouw fitness: CTL nu min 7 dagen terug; meer dan 8 is oranje.
   - Ziek > 0 is rood.
