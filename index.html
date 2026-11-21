@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="904dd817c4">
+<meta name="dashboard-versie" content="61c32e1cf5">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -1810,7 +1810,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   const READY = [
     { key: 'hrv', bandDir: 'low', name: 'HRV' },
     { key: 'rhr', bandDir: 'high', name: 'Rusthartslag' },
-    { key: 'mSlaap', bandDir: 'low', bad: (v) => v <= 4, name: 'Slaap' },
+    { key: 'mSlaap', bandDir: 'low', bad: (v) => v <= 4, fallback: 8, unit: 'uur', name: 'Slaap' }, // uren; 8 uur tot er genoeg dagen zijn voor een eigen normaal
     { key: 'mWakker', bandDir: 'high', bad: (v) => v >= 3, name: 'Wakker gelegen' },
     { key: 'mGevoel', bandDir: 'low', name: 'Ochtendgevoel' },
     { key: 'form', fixed: (v) => (v < -30 ? 'bad' : v < -10 ? 'warn' : 'good'), note: (v) => (v < -30 ? 'erg vermoeid (onder −30)' : v < -10 ? 'zware periode (−10 tot −30)' : 'fris genoeg (boven −10)'), name: 'Vorm' },
@@ -1844,10 +1844,11 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     const d = val(sg.key, today) != null ? today : val(sg.key, yest) != null ? yest : null;
     if (!d) return { st: 'na', d: null, value: '–', note: sg.evening ? 'geen dagscore gisteren of vandaag' : 'nog niet gemeten' };
     const v = val(sg.key, d);
-    const value = fmtMetric(sg.key, v);
+    const u = sg.unit ? ' ' + sg.unit : '';
+    const value = fmtMetric(sg.key, v) + u;
     if (sg.fixed) return { st: sg.fixed(v), d, v, value, note: dayTag(d) + sg.note(v) };
     // bij scores (1–10, 0–4) minstens een halve punt marge, zodat één halve punt verschil niet meteen telt
-    const band = (day) => { const b = baseline(sg.key, day); if (!b || M[sg.key].max == null) return b; return { ...b, lo: Math.min(b.lo, b.mu - 0.5), hi: Math.max(b.hi, b.mu + 0.5) }; };
+    const band = (day) => { const b = baseline(sg.key, day) || (sg.fallback != null ? { mu: sg.fallback, lo: sg.fallback, hi: sg.fallback, provisional: true } : null); if (!b || M[sg.key].max == null) return b; return { ...b, lo: Math.min(b.lo, b.mu - 0.5), hi: Math.max(b.hi, b.mu + 0.5) }; };
     const bl = band(d);
     if (!bl) return { st: 'na', d, v, value, note: dayTag(d) + 'nog te weinig dagen voor je normaal' };
     const out = (x, day) => { const b = day === d ? bl : band(day); return x != null && b && (sg.bandDir === 'low' ? x < b.lo : x > b.hi); };
@@ -1856,7 +1857,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     let st = off ? (offTwice ? 'bad' : 'warn') : 'good';
     if (sg.bad && sg.bad(v)) st = 'bad';
     const dd = M[sg.key].d;
-    let note = `normaal ${fmt(bl.lo, dd)}–${fmt(bl.hi, dd)}`;
+    let note = bl.provisional ? `voorlopig normaal ${fmt(bl.mu, dd)}${u}` : `normaal ${fmt(bl.lo, dd)}–${fmt(bl.hi, dd)}${u}`;
     if (off) note += offTwice ? (sg.bandDir === 'low' ? ' · 2 dagen eronder' : ' · 2 dagen erboven') : (sg.bandDir === 'low' ? ' · eronder' : ' · erboven');
     return { st, d, v, value, note: dayTag(d) + note, off };
   }
@@ -2087,7 +2088,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       E('span', null, 'Alcohol 1', lg); for (const c of ['--a1', '--a2', '--a3', '--a4', '--a5']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '10', lg);
       E('span', null, '·  Drugs 1', lg).style.marginLeft = '8px'; for (const c of ['--o2', '--o3', '--o4']) E('i', null, null, lg).style.background = `var(${c})`; E('span', null, '3', lg);
     } });
-  new TimeChart('c-slaap', { id: 'slaap', title: 'Slaap', sub: 'Hoe je sliep, uit Ochtendscore, 1–10', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Nog geen ochtendscores in deze periode',
+  new TimeChart('c-slaap', { id: 'slaap', title: 'Slaap', sub: 'Uren geslapen, uit Ochtendscore', kind: 'line', smooth: true, height: 200, ...L10, empty: 'Nog geen ochtendscores in deze periode',
     series: [{ key: 'mSlaap', label: 'Slaap', color: '--s1' }] });
   new TimeChart('c-wakker', { id: 'wakker', title: 'Wakker', sub: 'Wakker gelegen, uit Ochtendscore, 0–4', kind: 'line', smooth: true, height: 200, y: [0, 4], yTicks: [0, 1, 2, 3, 4], empty: 'Nog geen ochtendscores in deze periode',
     series: [{ key: 'mWakker', label: 'Wakker', color: '--s2' }] });

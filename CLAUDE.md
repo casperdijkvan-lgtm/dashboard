@@ -43,6 +43,8 @@ Het leest (alleen lezen, nooit schrijven):
   - HRV, rusthartslag, slaap, wakker en ochtendgevoel tegen de eigen band (28 dagen, ± 1 sd; bij
     scores minstens ± 0,5). Buiten de band is oranje, 2 dagen op rij is rood. Slaap ≤ 4 en Wakker ≥ 3
     zijn altijd rood.
+  - Slaap is in uren. Zolang er te weinig dagen zijn voor een eigen band (minder dan 10 metingen in
+    28 dagen) geldt voorlopig 8 uur als normaal, dus onder 7,5 uur is oranje.
   - Vorm: onder −10 oranje, onder −30 rood.
   - Opbouw fitness: CTL nu min 7 dagen terug; meer dan 8 is oranje.
   - Ziek > 0 is rood.
