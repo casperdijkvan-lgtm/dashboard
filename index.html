@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="5359a66800">
+<meta name="dashboard-versie" content="387dbbdfb2">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -617,7 +617,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   const K = {
     auth: 'dashboard.dropbox.v1', pkce: 'dashboard.pkce.v1', icu: 'dashboard.icu.v1', cache: 'dashboard.cache.v2',
     range: 'dashboard.range.v1', smooth: 'dashboard.smooth.v1', tab: 'dashboard.tab.v1', hidden: 'dashboard.hidden.v1',
-    scatter: 'dashboard.scatter.v1', cal: 'dashboard.cal.v1',
+    scatter: 'dashboard.scatter.v1', cal: 'dashboard.cal.v1', autoLogin: 'dashboard.autologin.v1',
   };
 
   // ================= Hulpjes =================
@@ -755,6 +755,19 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     const p = new URLSearchParams({ client_id: CFG.dropboxKey, response_type: 'code', code_challenge: challenge,
       code_challenge_method: 'S256', redirect_uri: REDIRECT, token_access_type: 'offline', state });
     location.href = 'https://www.dropbox.com/oauth2/authorize?' + p;
+  }
+  // Bij openen zonder werkende koppeling meteen naar de Dropbox-inlog. Niet als je net zelf ontkoppelde,
+  // het inloggen net misging, je offline bent of in Instellingen zit, en hooguit één keer per minuut (geen lus).
+  let autoLoginOff = false;
+  function autoLogin() {
+    if (isLinked() || autoLoginOff || BUSY || $('#settings').open || navigator.onLine === false) return false;
+    if (location.hostname !== 'casperdijkvan-lgtm.github.io') return false; // alleen dit adres kent Dropbox
+    if (Date.now() - (store.get(K.autoLogin) || 0) < 60000) return false;
+    store.set(K.autoLogin, Date.now());
+    if (store.get(K.autoLogin) == null) return false; // zonder opslag geen bescherming tegen een lus
+    setSync('busy', 'Naar Dropbox…');
+    startLogin();
+    return true;
   }
   async function tokenRequest(params) {
     const res = await fetch('https://api.dropboxapi.com/oauth2/token', { method: 'POST', body: new URLSearchParams(params) });
@@ -2273,6 +2286,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     setSync(errs.length ? 'err' : 'ok', errs.length ? `${errs.length} ${errs.length === 1 ? 'bron' : 'bronnen'} niet gelukt` : sinceText(RAW.at));
     renderSources();
     if (!isLinked() && !(ic && ic.key)) setSync('ok', '');
+    autoLogin(); // de koppeling bleek verlopen
   }
   function renderSources() {
     const ul = $('#srcList');
@@ -2329,6 +2343,7 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   $('#dbxConnect').addEventListener('click', startLogin);
   $('#welcomeDbx').addEventListener('click', startLogin);
   $('#dbxDisconnect').addEventListener('click', () => {
+    autoLoginOff = true;
     saveAuth(null);
     delete RAW.scores; delete RAW.work; delete RAW.hrv;
     store.set(K.cache, RAW);
@@ -2399,9 +2414,12 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
+    if (autoLogin()) return;
     checkVersion();
     if (!RAW.at || Date.now() - RAW.at > 10 * 60000) refresh();
   });
+  // Met de terugknop terug van Dropbox: de status weer normaal tonen
+  window.addEventListener('pageshow', (e) => { if (e.persisted) setSync('ok', sinceText(RAW.at)); });
 
   // ================= Start =================
   buildModel();
@@ -2410,8 +2428,11 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   (async () => {
     let returning = false;
     try { returning = await finishLogin(); }
-    catch (err) { returning = true; setSync('err', 'Inloggen bij Dropbox lukte niet: ' + (err.message || err)); }
-    if (!returning) checkVersion();
+    catch (err) { returning = true; autoLoginOff = true; setSync('err', 'Inloggen bij Dropbox lukte niet: ' + (err.message || err)); }
+    if (!returning) {
+      if (autoLogin()) return;
+      checkVersion();
+    }
     if (isLinked() || (icuCfg() && icuCfg().key)) refresh();
   })();
 

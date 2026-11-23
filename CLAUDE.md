@@ -94,6 +94,11 @@ Dropbox-app **DagScoresDashboard**, app key `jvqh2qs61dyyqnp` (niet geheim; PKCE
 Dropbox, scopes `files.metadata.read` en `files.content.read`. Redirect-URI:
 `https://casperdijkvan-lgtm.github.io/dashboard/`.
 
+Bij openen controleert het dashboard de koppeling; werkt die niet, dan gaat het meteen naar de
+Dropbox-inlog (`autoLogin()`). Niet als je net zelf ontkoppelde, het inloggen net misging, je offline
+bent of in Instellingen zit, en hooguit één keer per minuut (`dashboard.autologin.v1`), zodat er nooit
+een lus ontstaat.
+
 ## Testen
 
 Geen testsuite. `window.__dash` biedt testhaakjes (`setRaw`, `data()`, `M`, `parseDelimited`). Test met
