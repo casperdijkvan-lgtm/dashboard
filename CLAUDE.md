@@ -94,10 +94,11 @@ Dropbox-app **DagScoresDashboard**, app key `jvqh2qs61dyyqnp` (niet geheim; PKCE
 Dropbox, scopes `files.metadata.read` en `files.content.read`. Redirect-URI:
 `https://casperdijkvan-lgtm.github.io/dashboard/`.
 
-Bij openen controleert het dashboard de koppeling; werkt die niet, dan gaat het meteen naar de
-Dropbox-inlog (`autoLogin()`). Niet als je net zelf ontkoppelde, het inloggen net misging, je offline
-bent of in Instellingen zit, en hooguit één keer per minuut (`dashboard.autologin.v1`), zodat er nooit
-een lus ontstaat.
+Bij openen controleert het dashboard de koppeling (`autoLogin()`). Werkt die niet, dan verschijnt een
+inlogscherm over de hele pagina. In een browsertabblad gaat het ook meteen door naar Dropbox (hooguit
+één keer per minuut via `dashboard.autologin.v1`, niet offline of na een mislukte inlog). In een app op
+het beginscherm is één tik nodig, omdat doorsturen zonder tik daar stil kan mislukken. Geen scherm als
+je zelf ontkoppelde, "Later" koos of in Instellingen zit.
 
 ## Testen
 

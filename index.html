@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="387dbbdfb2">
+<meta name="dashboard-versie" content="90a83dbe63">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -182,6 +182,12 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 36px; }
 .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .sec-title { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
 .sec-note { margin: 0; color: var(--muted); font-size: 13px; }
+.login-gate { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; background: var(--plane); }
+.login-gate[hidden] { display: none; }
+.login-card { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; padding: 22px; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; text-align: center; }
+.login-card h2 { margin: 0; font-size: 21px; }
+.login-card p { margin: 0 0 6px; color: var(--ink-2); font-size: 15px; line-height: 1.4; }
+.login-card .btn { justify-content: center; width: 100%; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .span-2 { grid-column: span 2; }
@@ -575,6 +581,15 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   <div id="sheetBody"></div>
 </section>
 
+<div class="login-gate" id="loginGate" role="dialog" aria-modal="true" aria-labelledby="loginGateTitle" hidden>
+  <div class="login-card">
+    <h2 id="loginGateTitle">Log in bij Dropbox</h2>
+    <p id="loginGateText"></p>
+    <button class="btn primary" id="loginGateBtn" type="button">Inloggen bij Dropbox</button>
+    <button class="btn" id="loginGateLater" type="button">Later</button>
+  </div>
+</div>
+
 <dialog id="settings" aria-label="Instellingen">
   <div class="set-inner">
     <div class="set-head"><h2>Instellingen</h2><button class="icon-btn" type="button" id="closeSettings" aria-label="Sluiten"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
@@ -756,16 +771,23 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       code_challenge_method: 'S256', redirect_uri: REDIRECT, token_access_type: 'offline', state });
     location.href = 'https://www.dropbox.com/oauth2/authorize?' + p;
   }
-  // Bij openen zonder werkende koppeling meteen naar de Dropbox-inlog. Niet als je net zelf ontkoppelde,
-  // het inloggen net misging, je offline bent of in Instellingen zit, en hooguit één keer per minuut (geen lus).
-  let autoLoginOff = false;
+  // Bij openen zonder werkende koppeling: altijd een inlogscherm. In een browsertabblad ook meteen door
+  // naar Dropbox. In een app op het beginscherm is één tik nodig, want daar kan doorsturen zonder tik
+  // stil mislukken. Geen scherm als je zelf ontkoppelde, "Later" koos of in Instellingen zit.
+  let autoLoginOff = false, gateClosed = false, loginProblem = '';
+  const isInstalled = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
   function autoLogin() {
-    if (isLinked() || autoLoginOff || BUSY || $('#settings').open || navigator.onLine === false) return false;
+    if (isLinked() || BUSY || gateClosed || $('#settings').open) return false;
     if (location.hostname !== 'casperdijkvan-lgtm.github.io') return false; // alleen dit adres kent Dropbox
+    const offline = navigator.onLine === false;
+    $('#loginGateText').textContent = loginProblem || (offline
+      ? 'Het dashboard is niet verbonden met Dropbox en je bent offline. Log in zodra je weer internet hebt.'
+      : 'Het dashboard is niet verbonden met Dropbox. Log in om je scores en metingen op te halen.');
+    $('#loginGate').hidden = false;
+    if (autoLoginOff || offline || isInstalled()) return false;
     if (Date.now() - (store.get(K.autoLogin) || 0) < 60000) return false;
     store.set(K.autoLogin, Date.now());
     if (store.get(K.autoLogin) == null) return false; // zonder opslag geen bescherming tegen een lus
-    setSync('busy', 'Naar Dropbox…');
     startLogin();
     return true;
   }
@@ -2342,8 +2364,10 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
   $('#dbxConnect').addEventListener('click', startLogin);
   $('#welcomeDbx').addEventListener('click', startLogin);
+  $('#loginGateBtn').addEventListener('click', () => startLogin());
+  $('#loginGateLater').addEventListener('click', () => { gateClosed = true; $('#loginGate').hidden = true; });
   $('#dbxDisconnect').addEventListener('click', () => {
-    autoLoginOff = true;
+    gateClosed = true;
     saveAuth(null);
     delete RAW.scores; delete RAW.work; delete RAW.hrv;
     store.set(K.cache, RAW);
@@ -2418,8 +2442,6 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     checkVersion();
     if (!RAW.at || Date.now() - RAW.at > 10 * 60000) refresh();
   });
-  // Met de terugknop terug van Dropbox: de status weer normaal tonen
-  window.addEventListener('pageshow', (e) => { if (e.persisted) setSync('ok', sinceText(RAW.at)); });
 
   // ================= Start =================
   buildModel();
@@ -2428,11 +2450,14 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
   (async () => {
     let returning = false;
     try { returning = await finishLogin(); }
-    catch (err) { returning = true; autoLoginOff = true; setSync('err', 'Inloggen bij Dropbox lukte niet: ' + (err.message || err)); }
-    if (!returning) {
-      if (autoLogin()) return;
-      checkVersion();
+    catch (err) {
+      returning = true;
+      autoLoginOff = true;
+      loginProblem = 'Inloggen bij Dropbox lukte niet: ' + (err.message || err);
+      setSync('err', loginProblem);
     }
+    if (autoLogin()) return;
+    if (!returning) checkVersion();
     if (isLinked() || (icuCfg() && icuCfg().key)) refresh();
   })();
 
