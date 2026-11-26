@@ -5,7 +5,9 @@ Persoonlijk dashboard voor iPhone én Mac: https://casperdijkvan-lgtm.github.io/
 Het leest (alleen lezen, nooit schrijven):
 - Dropbox `/Apps/Scores/Scores.csv`, `WorkScores.csv`, `MorningScores.csv`: geschreven door de
   score-apps in de **andere repository** `casperdijkvan-lgtm/dagscore`.
-- Dropbox `/Apps/HRV4Training`: het nieuwste exportbestand (rMSSD, rusthartslag).
+- Dropbox `/Apps/HRV4Training`: het nieuwste exportbestand (rMSSD, rusthartslag). `dateParser()` kiest
+  zelf de volgorde (ook jaar-dag-maand zoals `2026_26_11`); Instellingen › Bronnen toont de laatste
+  herkende meting en hoe die datum in het bestand staat.
 - intervals.icu: uren, belasting, fitness, vermoeidheid, vorm. De API-sleutel en athlete-ID vult de
   gebruiker zelf in bij Instellingen; die blijven in `localStorage` op het apparaat.
 

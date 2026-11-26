@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
-<meta name="dashboard-versie" content="90a83dbe63">
+<meta name="dashboard-versie" content="1c51516a3e">
 <style>
 /* Ontwerp: rustige, Apple-achtige kaarten op een zacht vlak; de data is het enige dat kleur draagt.
    Kleuren volgen het gevalideerde referentiepalet (categorisch, sequentieel blauw, divergerend blauw/rood). */
@@ -715,26 +715,26 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
     if (!body.length) return { header: [], rows: [] };
     return { header: body[0].map((h) => h.trim()), rows: body.slice(1) };
   }
-  // Datum in allerlei vormen; bij dd/mm vs mm/dd kiest het de lezing die het best oploopt
+  // Datum in allerlei vormen. Bij dd/mm vs mm/dd, en jjjj-mm-dd vs jjjj-dd-mm (zoals HRV4Training in
+  // bestandsnamen: 2026_26_11), kiest het de lezing die het best oploopt. Ongeldige datums tellen niet.
   function dateParser(samples) {
-    const tryParse = (s, order) => {
+    const ok = (y, mo, d) => (mo >= 1 && mo <= 12 && d >= 1 && d <= 31 ? `${y}-${pad(mo)}-${pad(d)}` : null);
+    const tryParse = (s, o) => {
       s = String(s || '').trim();
       let m = s.match(/^(\d{4})[-/._](\d{1,2})[-/._](\d{1,2})/);
-      if (m) return `${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
-      m = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})/);
+      if (m) return o.ydm ? ok(m[1], +m[3], +m[2]) : ok(m[1], +m[2], +m[3]);
+      m = s.match(/^(\d{1,2})[-/._](\d{1,2})[-/._](\d{2,4})/);
       if (m) {
         const y = m[3].length === 2 ? '20' + m[3] : m[3];
-        const [d, mo] = order === 'mdy' ? [+m[2], +m[1]] : [+m[1], +m[2]];
-        if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
-        return `${y}-${pad(mo)}-${pad(d)}`;
+        return o.mdy ? ok(y, +m[1], +m[2]) : ok(y, +m[2], +m[1]);
       }
       const t = Date.parse(s);
       return isNaN(t) ? null : isoOf(new Date(t));
     };
-    const score = (order) => {
+    const score = (o) => {
       let bad = 0, prev = null, valid = 0;
       for (const s of samples) {
-        const d = tryParse(s, order);
+        const d = tryParse(s, o);
         if (!d) { bad += 2; continue; }
         valid++;
         if (prev && d < prev) bad++;
@@ -742,8 +742,12 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       }
       return bad - valid * 0.001;
     };
-    const order = score('dmy') <= score('mdy') ? 'dmy' : 'mdy';
-    return (s) => tryParse(s, order);
+    let best = {}, bestScore = score(best);
+    for (const o of [{ mdy: true }, { ydm: true }, { ydm: true, mdy: true }]) {
+      const sc = score(o);
+      if (sc < bestScore) { best = o; bestScore = sc; }
+    }
+    return (s) => tryParse(s, best);
   }
   const findCol = (header, tests, avoid) => {
     for (const t of tests) {
@@ -985,11 +989,13 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       const di = findCol(t.header, [/^date$/i, /^datum$/i, /date/i, /^day$/i]);
       const ri = findCol(t.header, [/^rmssd$/i, /rmssd/i], /ln/i);
       const hi = findCol(t.header, [/^hr$/i, /^rhr$/i, /resting.?hr/i, /^heart.?rate$/i, /^hr[ _(]/i]);
+      let last = null, lastRaw = null;
       if (di >= 0) {
         const parse = dateParser(t.rows.slice(0, 400).map((r) => r[di]));
         for (const row of t.rows) {
           const d = parse(row[di]);
           if (!d) continue;
+          if (!last || d > last) { last = d; lastRaw = row[di]; }
           const r = rec(d);
           const hv = ri >= 0 ? num(row[ri]) : null;
           const hr = hi >= 0 ? num(row[hi]) : null;
@@ -997,7 +1003,8 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
           if (hr != null && hr > 20 && hr < 200) r.rhr = hr;
         }
       }
-      RAW.hrv.cols = { date: t.header[di], rmssd: t.header[ri], hr: t.header[hi] };
+      RAW.hrv.cols = { date: t.header[di], rmssd: t.header[ri], hr: t.header[hi], last, lastRaw,
+        sample: di >= 0 && t.rows.length ? t.rows[t.rows.length - 1][di] : null };
     }
     // intervals.icu
     if (RAW.icu) {
@@ -2329,6 +2336,9 @@ dialog#settings::backdrop { background: rgba(0, 0, 0, .35); -webkit-backdrop-fil
       const li = E('li', null, null, ul); E('i', null, null, li).style.visibility = 'hidden';
       const t = E('div', null, null, li);
       E('span', null, `HRV-kolommen herkend: datum “${c.date || '?'}”, HRV “${c.rmssd || '–'}”, hartslag “${c.hr || '–'}”`, t);
+      E('span', null, c.last
+        ? `Laatste meting: ${new Date(c.last + 'T12:00').toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (in het bestand: “${c.lastRaw}”)`
+        : `Geen datum herkend${c.sample ? ` (bijvoorbeeld “${c.sample}”)` : ''}`, t);
     }
     $('#dbxConnect').hidden = isLinked();
     $('#dbxDisconnect').hidden = !isLinked();
