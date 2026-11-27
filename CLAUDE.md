@@ -81,7 +81,9 @@ niet, pas dan de bestanden aan (via een eenmalige omzetting in de score-apps), n
 Kolomnamen en schalen moeten overeenkomen met de vragen in `casperdijkvan-lgtm/dagscore`
 (`bron/dagscore.html` en `bron/build_site.py`). Huidige schalen: Happiness/Energie/Levenscontentheid/
 Unclenched/Slaap/Gevoel/Robin 1–10, Privestress en werk-Stress 0–5, Ziek, Drugs en Vrienden 0–3, Alcohol 0–10,
-Wakker 0–4 (halve punten). Verandert daar iets, pas dan `M` en de grafieken hier aan.
+Wakker 0–4 (halve punten). Slaap in `MorningScores.csv` is in uren en wordt door Ochtendscore berekend
+uit de kolommen `Naar bed` en `Opgestaan` (tijden als `23:30`) min Wakker. Die twee tijdkolommen toont
+het dashboard (nog) niet. Verandert daar iets, pas dan `M` en de grafieken hier aan.
 
 ## Wensen van de gebruiker
 
